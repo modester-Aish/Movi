@@ -1,0 +1,184 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { searchMoviesByTitle } from "../data/bulkMovieIds";
+import { getMoviesByImdbIds, getImageUrl, getYear } from "../api/tmdb";
+import type { Movie } from "../api/tmdb";
+
+interface SearchModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [suggestions, setSuggestions] = useState<Movie[]>([]);
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isOpen) {
+      setSearchTerm("");
+      setSuggestions([]);
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      if (searchTerm.trim().length < 2) {
+        setSuggestions([]);
+        return;
+      }
+
+      setLoading(true);
+      try {
+        // Get movie IDs for search
+        const movieIds = searchMoviesByTitle(searchTerm, 30);
+        const moviesData = await getMoviesByImdbIds(movieIds);
+        
+        // Filter by search term (client-side filtering)
+        const filtered = moviesData.filter(movie =>
+          movie.title.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+        
+        // Remove duplicates
+        const uniqueMovies = filtered.filter((movie, index, self) => 
+          index === self.findIndex(m => m.imdb_id === movie.imdb_id)
+        );
+        
+        setSuggestions(uniqueMovies.slice(0, 8)); // Show max 8 suggestions
+      } catch (error) {
+        console.error('Error fetching suggestions:', error);
+        setSuggestions([]);
+      }
+      setLoading(false);
+    };
+
+    const debounceTimer = setTimeout(fetchSuggestions, 300);
+    return () => clearTimeout(debounceTimer);
+  }, [searchTerm]);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchTerm.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchTerm.trim())}`);
+      onClose();
+    }
+  };
+
+  const handleSuggestionClick = (movie: Movie) => {
+    router.push(`/movie/${movie.imdb_id}`);
+    onClose();
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto">
+      <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        {/* Background overlay */}
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-75 transition-opacity"
+          onClick={onClose}
+        ></div>
+
+        {/* Modal content */}
+        <div className="inline-block align-bottom bg-gray-900 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+          <form onSubmit={handleSearch} className="bg-gray-900 px-4 pt-5 pb-4 sm:p-6">
+            <div className="text-center mb-6">
+              <div className="text-4xl mb-4">🔍</div>
+              <h3 className="text-xl font-semibold text-white mb-2">Search Movies</h3>
+              <p className="text-gray-400">Find your favorite movies in our collection</p>
+            </div>
+            
+            {/* Search input */}
+            <div className="relative mb-6">
+              <input
+                type="text"
+                placeholder="Enter movie title..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-lg"
+                autoFocus
+              />
+              <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                {loading ? (
+                  <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-purple-500"></div>
+                ) : (
+                  <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                )}
+              </div>
+            </div>
+
+            {/* Live Suggestions */}
+            {suggestions.length > 0 && (
+              <div className="mb-6">
+                <h4 className="text-purple-400 font-semibold mb-3">💡 Suggestions:</h4>
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  {suggestions.map((movie, index) => (
+                    <button
+                      key={`${movie.imdb_id}-${index}`}
+                      onClick={() => handleSuggestionClick(movie)}
+                      className="w-full flex items-center space-x-3 p-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors text-left"
+                    >
+                      <div className="relative w-12 h-16 bg-gray-700 rounded overflow-hidden flex-shrink-0">
+                        <img
+                          src={movie.poster_path ? getImageUrl(movie.poster_path) : '/placeholder.jpg'}
+                          alt={movie.title}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h5 className="text-white font-medium truncate">{movie.title}</h5>
+                        <p className="text-gray-400 text-sm">{getYear(movie.release_date)}</p>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <span className="text-yellow-400 text-xs">⭐</span>
+                        <span className="text-gray-400 text-xs">
+                          {movie.vote_average ? movie.vote_average.toFixed(1) : 'N/A'}
+                        </span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Search tips */}
+            <div className="bg-purple-900/20 border border-purple-500/30 rounded-lg p-4 mb-6">
+              <h4 className="text-purple-400 font-semibold mb-2">💡 Search Tips:</h4>
+              <ul className="text-gray-300 text-sm space-y-1">
+                <li>• Use movie titles (e.g., "The Godfather")</li>
+                <li>• Try partial names (e.g., "Batman")</li>
+                <li>• Search by year (e.g., "2023")</li>
+                <li>• Use actor names (e.g., "Tom Hanks")</li>
+              </ul>
+            </div>
+          </form>
+
+          {/* Modal footer */}
+          <div className="bg-gray-800 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+            <button
+              type="submit"
+              onClick={handleSearch}
+              disabled={!searchTerm.trim()}
+              className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-purple-600 text-base font-medium text-white hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed sm:ml-3 sm:w-auto sm:text-sm"
+            >
+              Search Movies
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-600 shadow-sm px-4 py-2 bg-gray-700 text-base font-medium text-gray-300 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
