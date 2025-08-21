@@ -3,7 +3,7 @@
 const TMDB_API_KEY = 'b31d2e5f33b74ffa7b3b483ff353f760';
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 
-type Movie = {
+export type Movie = {
   id: number;
   imdb_id: string;
   title: string;
@@ -11,6 +11,13 @@ type Movie = {
   poster_path: string;
   release_date: string;
   genres: { id: number; name: string }[];
+  runtime?: number;
+  vote_average?: number;
+  original_language?: string;
+  status?: string;
+  budget?: number;
+  revenue?: number;
+  backdrop_path?: string;
 };
 
 type Video = {
@@ -59,6 +66,13 @@ export async function getMovieByImdbId(imdbId: string): Promise<Movie | null> {
       poster_path: movieData.poster_path,
       release_date: movieData.release_date,
       genres: movieData.genres || [],
+      runtime: movieData.runtime,
+      vote_average: movieData.vote_average,
+      original_language: movieData.original_language,
+      status: movieData.status,
+      budget: movieData.budget,
+      revenue: movieData.revenue,
+      backdrop_path: movieData.backdrop_path,
     };
   } catch (error) {
     console.error('Error fetching movie by IMDB ID:', error);

@@ -1,446 +1,297 @@
 "use client";
 
-import Image from 'next/image';
-import Link from 'next/link';
-import { getMovieByImdbId, getImageUrl, getFullImageUrl, getYear, getSimilarMovies, getMovieVideos } from '@/app/api/tmdb';
-import { useState, useEffect } from 'react';
-import { use } from 'react';
+import { useState, useEffect } from "react";
+import { use } from "react";
+import { getMovieByImdbId, getSimilarMovies, getImageUrl, getYear } from "../../api/tmdb";
+import type { Movie } from "../../api/tmdb";
+import Link from "next/link";
+import Image from "next/image";
 
-type Props = {
+interface MoviePageProps {
   params: Promise<{
     imdbId: string;
   }>;
-};
+}
 
-export default function MoviePage({ params: paramsPromise }: Props) {
-  const params = use(paramsPromise) as { imdbId: string };
-  const [movie, setMovie] = useState<any>(null);
+export default function MoviePage({ params }: MoviePageProps) {
+  const { imdbId } = use(params);
+  const [movie, setMovie] = useState<Movie | null>(null);
   const [similarMovies, setSimilarMovies] = useState<any[]>([]);
-  const [videos, setVideos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'watch' | 'download'>('watch');
-  
+  const [error, setError] = useState<string | null>(null);
+  const [activePlayer, setActivePlayer] = useState(1);
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        if (!params.imdbId) return;
-        
-        const imdbId = params.imdbId;
-        const movieData = await getMovieByImdbId(imdbId);
-        
-        if (!movieData) {
-          setLoading(false);
-          return;
-        }
-        
-        setMovie(movieData);
-        
-        const similarMoviesData = await getSimilarMovies(movieData.id);
-        setSimilarMovies(similarMoviesData);
-        
-        const videosData = await getMovieVideos(movieData.id);
-        setVideos(videosData);
-        
+    const loadMovieData = async () => {
+      if (!imdbId) {
+        setError("Movie ID not found");
         setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const movieData = await getMovieByImdbId(imdbId);
+        const similarData = movieData ? await getSimilarMovies(movieData.id) : [];
+
+        setMovie(movieData);
+        setSimilarMovies(similarData);
+
       } catch (error) {
-        console.error('Error fetching movie data:', error);
+        console.error('Error loading movie:', error);
+        setError('Failed to load movie data');
+      } finally {
         setLoading(false);
       }
     };
-    
-    fetchData();
-  }, [params]);
-  
+
+    loadMovieData();
+  }, [imdbId]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
-        <div className="flex flex-col items-center justify-center min-h-screen p-4">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
-          <p className="mt-4 text-gray-400 text-lg">Loading movie...</p>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex justify-center items-center min-h-[60vh]">
+            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-purple-500"></div>
+            <span className="ml-4 text-gray-400 text-lg">Loading movie...</span>
+          </div>
         </div>
       </div>
     );
   }
-  
-  if (!movie) {
+
+  if (error || !movie) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
-        <div className="flex flex-col items-center justify-center min-h-screen p-4">
-          <h1 className="text-2xl font-bold mb-4 text-white">Movie not found</h1>
-          <Link href="/" className="text-blue-500 hover:underline">
-            Back to Home
-          </Link>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="text-center py-16">
+            <div className="text-8xl mb-6">⚠️</div>
+            <h2 className="text-2xl font-bold text-white mb-4">Movie Not Found</h2>
+            <p className="text-gray-400 mb-6">{error || 'This movie could not be loaded.'}</p>
+            <Link 
+              href="/"
+              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200"
+            >
+              Back to Home
+            </Link>
+          </div>
         </div>
       </div>
     );
   }
-  
+
+  const getPlayerUrl = (playerNumber: number) => {
+    const baseUrl = `https://vidsrc.me/embed/movie?imdb=${imdbId}`;
+    const alternativeUrls = [
+      `https://vidsrc.to/embed/movie/${imdbId}`,
+      `https://vidsrc.xyz/embed/movie/${imdbId}`,
+      `https://vidsrc.pro/embed/movie/${imdbId}`
+    ];
+    return playerNumber === 1 ? baseUrl : alternativeUrls[playerNumber - 2] || baseUrl;
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
-      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Link href="/" className="inline-block mb-6 text-purple-400 hover:text-purple-300 transition-colors">
-          &larr; Back to Home
-        </Link>
-        
         {/* Movie Header */}
-        <div className="bg-gray-800 rounded-lg shadow-2xl overflow-hidden mb-8">
-          <div className="relative w-full h-[400px] md:h-[500px] lg:h-[600px]">
-            <Image 
-              src={movie.poster_path ? getFullImageUrl(movie.poster_path) : '/placeholder.jpg'}
-              alt={movie.title}
-              fill
-              className="object-cover"
-              priority
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end">
-              <div className="p-8 w-full">
-                <div className="max-w-4xl">
-                  <h1 className="text-3xl md:text-5xl font-bold text-white mb-4">
-                    {movie.title} <span className="text-gray-300">({getYear(movie.release_date)})</span>
-                  </h1>
-                  <div className="flex flex-wrap gap-2 mb-6">
-                    {movie.genres.map((genre: any) => (
-                      <span 
-                        key={genre.id} 
-                        className="px-3 py-1 bg-purple-600 text-white text-sm rounded-full"
-                      >
-                        {genre.name}
-                      </span>
-                    ))}
-                  </div>
-                  <p className="text-gray-300 text-lg leading-relaxed max-w-3xl">
-                    {movie.overview}
-                  </p>
-                </div>
+        <div className="mb-8">
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* Movie Poster */}
+            <div className="lg:w-1/3">
+              <div className="relative aspect-[2/3] rounded-lg overflow-hidden shadow-xl">
+                <Image
+                  src={movie.poster_path ? getImageUrl(movie.poster_path) : '/placeholder.jpg'}
+                  alt={movie.title}
+                  fill
+                  className="object-cover"
+                />
               </div>
             </div>
-          </div>
-        </div>
-        
-        {/* Tab Navigation */}
-        <div className="mb-8">
-          <div className="flex space-x-1 bg-gray-800 p-1 rounded-lg">
-            <button
-              onClick={() => setActiveTab('watch')}
-              className={`flex-1 py-3 px-6 rounded-md font-medium transition-all duration-200 ${
-                activeTab === 'watch'
-                  ? 'bg-purple-600 text-white shadow-lg'
-                  : 'text-gray-300 hover:text-white hover:bg-gray-700'
-              }`}
-            >
-              🎬 Watch Movie
-            </button>
-            <button
-              onClick={() => setActiveTab('download')}
-              className={`flex-1 py-3 px-6 rounded-md font-medium transition-all duration-200 ${
-                activeTab === 'download'
-                  ? 'bg-green-600 text-white shadow-lg'
-                  : 'text-gray-300 hover:text-white hover:bg-gray-700'
-              }`}
-            >
-              ⬇️ Download Links
-            </button>
-          </div>
-        </div>
-        
-        {/* Content Based on Active Tab */}
-        {activeTab === 'watch' && (
-          <div className="bg-gray-800 rounded-lg shadow-2xl overflow-hidden mb-8">
-            <div className="p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-white">Watch {movie.title} Online</h2>
-                <div className="flex items-center space-x-2">
-                  <span className="text-yellow-400 text-lg">⭐</span>
-                  <span className="text-white font-semibold">
-                    {movie.vote_average ? movie.vote_average.toFixed(1) : 'N/A'}
-                  </span>
+
+            {/* Movie Info */}
+            <div className="lg:w-2/3">
+              <h1 className="text-4xl font-bold text-white mb-4">{movie.title}</h1>
+              
+              <div className="flex items-center space-x-4 mb-4">
+                <span className="text-gray-400">{getYear(movie.release_date)}</span>
+                <span className="text-gray-400">•</span>
+                <span className="text-gray-400">{movie.runtime || 'N/A'} min</span>
+                <span className="text-gray-400">•</span>
+                <div className="flex items-center">
+                  <span className="text-yellow-400 mr-1">⭐</span>
+                  <span className="text-white">{movie.vote_average?.toFixed(1) || 'N/A'}</span>
                 </div>
               </div>
-              
-              {/* Video Player */}
-              <div className="relative pt-[56.25%] bg-black rounded-lg overflow-hidden shadow-xl mb-6">
-                {params.imdbId ? (
-                  <>
-                    <iframe 
-                      className="absolute top-0 left-0 w-full h-full"
-                      src={`https://vidsrc.me/embed/movie?imdb=${params.imdbId}`}
-                      title={`${movie?.title || 'Movie Player'}`}
-                      frameBorder="0"
-                      referrerPolicy="origin"
-                      allowFullScreen
-                      allow="autoplay; fullscreen; picture-in-picture"
-                      loading="lazy"
-                      onError={(e) => {
-                        console.error('Iframe failed to load:', e);
-                      }}
-                    ></iframe>
-                    
-                  </>
-                ) : (
-                  <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-gray-900">
-                    <div className="text-center">
-                      <div className="text-red-400 text-6xl mb-4">⚠️</div>
-                      <p className="text-white text-lg">Movie ID not found</p>
-                      <p className="text-gray-400 text-sm">IMDB ID: {params.imdbId}</p>
-                    </div>
-                  </div>
+
+              <div className="flex flex-wrap gap-2 mb-6">
+                {movie.genres?.map((genre) => (
+                  <span
+                    key={genre.id}
+                    className="bg-purple-600 text-white px-3 py-1 rounded-full text-sm"
+                  >
+                    {genre.name}
+                  </span>
+                ))}
+              </div>
+
+              <p className="text-gray-300 text-lg leading-relaxed mb-6">
+                {movie.overview}
+              </p>
+
+              <div className="grid grid-cols-2 gap-4 text-gray-400 text-sm">
+                {movie.original_language && (
+                  <p><span className="text-white">Language:</span> {movie.original_language.toUpperCase()}</p>
+                )}
+                {movie.status && (
+                  <p><span className="text-white">Status:</span> {movie.status}</p>
+                )}
+                {movie.budget && movie.budget > 0 && (
+                  <p><span className="text-white">Budget:</span> ${movie.budget.toLocaleString()}</p>
+                )}
+                {movie.revenue && movie.revenue > 0 && (
+                  <p><span className="text-white">Revenue:</span> ${movie.revenue.toLocaleString()}</p>
                 )}
               </div>
-              
-              {/* Player Instructions */}
-              <div className="bg-purple-900/20 border border-purple-500/30 rounded-lg p-4 mb-6">
-                <h3 className="text-purple-400 font-semibold mb-2">📺 How to Watch:</h3>
-                <ul className="text-gray-300 space-y-1 text-sm">
-                  <li>• Click the play button 2-3 times until the movie starts</li>
-                  <li>• Close any popup ads that may appear</li>
-                  <li>• If the movie buffers, pause for 5-10 minutes then continue</li>
-                  <li>• For best experience, use a stable internet connection</li>
-                </ul>
-              </div>
             </div>
           </div>
-        )}
-        
-        {activeTab === 'download' && (
-          <div className="bg-gray-800 rounded-lg shadow-2xl overflow-hidden mb-8">
-            <div className="p-6">
-              <h2 className="text-2xl font-bold text-white mb-6">Download {movie.title}</h2>
-              
-              {/* Download Quality Options */}
-              <div className="grid md:grid-cols-2 gap-6">
-                {/* PkSpeed Links */}
-                <div className="bg-gray-700 rounded-lg p-6">
-                  <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
-                    <span className="bg-red-500 text-white px-2 py-1 rounded text-sm mr-2">PkSpeed</span>
-                    Download Links
-                  </h3>
-                  
-                  <div className="space-y-4">
-                    <div>
-                      <h4 className="text-green-400 font-medium mb-2">360p Quality</h4>
-                      <div className="space-y-2">
-                        <button className="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-medium transition-colors">
-                          Click To Download (Link 1 PkSpeed 360p)
-                        </button>
-                        <button className="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-medium transition-colors">
-                          Click To Download (Link 2 PkSpeed 360p)
-                        </button>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <h4 className="text-blue-400 font-medium mb-2">720p Quality</h4>
-                      <div className="space-y-2">
-                        <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-medium transition-colors">
-                          Click To Download (Link 1 PkSpeed 720p)
-                        </button>
-                        <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-medium transition-colors">
-                          Click To Download (Link 2 PkSpeed 720p)
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* MixDrop Links */}
-                <div className="bg-gray-700 rounded-lg p-6">
-                  <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
-                    <span className="bg-purple-500 text-white px-2 py-1 rounded text-sm mr-2">MixDrop</span>
-                    Download Links
-                  </h3>
-                  
-                  <div className="space-y-4">
-                    <div>
-                      <h4 className="text-green-400 font-medium mb-2">360p Quality</h4>
-                      <div className="space-y-2">
-                        <button className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 px-4 rounded-lg font-medium transition-colors">
-                          Click To Download (Link 1 MixDrop 360p)
-                        </button>
-                        <button className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 px-4 rounded-lg font-medium transition-colors">
-                          Click To Download (Link 2 MixDrop 360p)
-                        </button>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <h4 className="text-blue-400 font-medium mb-2">720p Quality</h4>
-                      <div className="space-y-2">
-                        <button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 px-4 rounded-lg font-medium transition-colors">
-                          Click To Download (Link 1 MixDrop 720p)
-                        </button>
-                        <button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 px-4 rounded-lg font-medium transition-colors">
-                          Click To Download (Link 2 MixDrop 720p)
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Additional Download Options */}
-              <div className="mt-6 grid md:grid-cols-2 gap-6">
-                {/* CloudVideo Links */}
-                <div className="bg-gray-700 rounded-lg p-6">
-                  <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
-                    <span className="bg-orange-500 text-white px-2 py-1 rounded text-sm mr-2">CloudVideo</span>
-                    Download Links
-                  </h3>
-                  <div className="space-y-2">
-                    <button className="w-full bg-orange-600 hover:bg-orange-700 text-white py-2 px-4 rounded-lg font-medium transition-colors">
-                      Click To Download (Link 1 ClVideo 360p)
-                    </button>
-                    <button className="w-full bg-orange-600 hover:bg-orange-700 text-white py-2 px-4 rounded-lg font-medium transition-colors">
-                      Click To Download (Link 2 ClVideo 720p)
-                    </button>
-                  </div>
-                </div>
-                
-                {/* Streamtape Links */}
-                <div className="bg-gray-700 rounded-lg p-6">
-                  <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
-                    <span className="bg-teal-500 text-white px-2 py-1 rounded text-sm mr-2">Streamtape</span>
-                    Download Links
-                  </h3>
-                  <div className="space-y-2">
-                    <button className="w-full bg-teal-600 hover:bg-teal-700 text-white py-2 px-4 rounded-lg font-medium transition-colors">
-                      Click To Download (Link 1 Streamtape 360p)
-                    </button>
-                    <button className="w-full bg-teal-600 hover:bg-teal-700 text-white py-2 px-4 rounded-lg font-medium transition-colors">
-                      Click To Download (Link 2 Streamtape 720p)
-                    </button>
-                  </div>
-                </div>
-              </div>
+        </div>
+
+        {/* Player Selection */}
+        <div className="mb-6">
+          <div className="flex flex-wrap gap-2">
+            {[1, 2, 3].map((playerNum) => (
+              <button
+                key={playerNum}
+                onClick={() => setActivePlayer(playerNum)}
+                className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                  activePlayer === playerNum
+                    ? 'bg-purple-600 text-white'
+                    : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                }`}
+              >
+                Player {playerNum}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Video Player */}
+        <div className="mb-8">
+          <div className="bg-black rounded-lg overflow-hidden shadow-xl">
+            <div className="relative pt-[56.25%]">
+              <iframe 
+                className="absolute top-0 left-0 w-full h-full"
+                src={getPlayerUrl(activePlayer)}
+                title={`${movie.title} - Player ${activePlayer}`}
+                frameBorder="0"
+                referrerPolicy="origin"
+                allowFullScreen
+                allow="autoplay; fullscreen; picture-in-picture"
+                loading="lazy"
+              ></iframe>
             </div>
           </div>
-        )}
-        
-        {/* Similar Movies */}
-        {similarMovies.length > 0 && (
-          <div className="bg-gray-800 rounded-lg shadow-2xl overflow-hidden mb-8">
-            <div className="p-6">
-              <h2 className="text-2xl font-bold text-white mb-6">Similar Movies</h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                {similarMovies.map((similar) => (
-                  <Link 
-                    href={`/movie/${similar.imdb_id}`} 
-                    key={similar.id}
-                    className="block transition-all duration-300 hover:transform hover:scale-105 group"
+          
+          {/* Player Instructions */}
+          <div className="mt-4 p-4 bg-yellow-900/20 border border-yellow-500/30 rounded-lg">
+            <p className="text-yellow-400 text-sm">
+              <strong>Note:</strong> To play Movie Click on Play icon on Player 2-3 times until Movie Starts. 
+              During this Few Useless windows opened just close them they are ADS. 
+              If the Movie keeps buffering, Just pause it for 5-10 minutes then continue playing!
+            </p>
+          </div>
+        </div>
+
+        {/* Download Links Section */}
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold text-white mb-6">Download Links</h2>
+          
+          {/* Quality Sections */}
+          {['720p', '480p', '360p'].map((quality) => (
+            <div key={quality} className="mb-6">
+              <h3 className="text-lg font-semibold text-white mb-3">{quality} Quality Links</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {['PkSpeed', 'MixDrop', 'CloudVideo', 'Streamtape'].map((host) => (
+                  <a
+                    key={host}
+                    href="#"
+                    className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-3 rounded-lg text-center transition-all duration-200 border border-gray-700 hover:border-purple-500"
                   >
-                    <div className="relative aspect-[2/3] rounded-lg overflow-hidden shadow-lg">
-                      <Image 
-                        src={similar.poster_path ? getImageUrl(similar.poster_path) : '/placeholder.jpg'}
-                        alt={similar.title}
-                        fill
-                        className="object-cover transition-transform duration-300 group-hover:scale-110"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    </div>
-                    <h3 className="mt-2 text-sm font-medium text-white truncate group-hover:text-purple-400 transition-colors">
-                      {similar.title}
-                    </h3>
-                    <p className="text-xs text-gray-400">{getYear(similar.release_date)}</p>
-                  </Link>
+                    <div className="font-medium">{host}</div>
+                    <div className="text-sm text-gray-400">{quality}</div>
+                  </a>
                 ))}
               </div>
             </div>
-          </div>
-        )}
-        
-        {/* Comments Section */}
-        <div className="bg-gray-800 rounded-lg shadow-2xl overflow-hidden">
-          <div className="p-6">
-            <h2 className="text-2xl font-bold text-white mb-6">Comments & Reviews</h2>
-            
-            {/* Comment Form */}
-            <form className="mb-8 bg-gray-700 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-white mb-4">Leave a Comment</h3>
-              <div className="grid md:grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">
-                    Your Name
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter your name"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
-                    Email (optional)
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter your email"
-                  />
-                </div>
+          ))}
+        </div>
+
+        {/* Movie Details */}
+        <div className="mb-12">
+          <div className="bg-gray-800/50 rounded-lg p-6 border border-gray-700">
+            <h3 className="text-xl font-bold text-white mb-4">Movie Details</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-300">
+              <div>
+                <p><strong>Title:</strong> {movie.title}</p>
+                <p><strong>Release Date:</strong> {movie.release_date}</p>
+                <p><strong>Runtime:</strong> {movie.runtime || 'N/A'} minutes</p>
+                <p><strong>Rating:</strong> {movie.vote_average?.toFixed(1) || 'N/A'}/10</p>
               </div>
-              <div className="mb-4">
-                <label htmlFor="comment" className="block text-sm font-medium text-gray-300 mb-2">
-                  Your Comment
-                </label>
-                <textarea
-                  id="comment"
-                  rows={4}
-                  className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Write your comment here..."
-                ></textarea>
-              </div>
-              <button
-                type="submit"
-                className="px-6 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-gray-800 transition-colors"
-              >
-                Post Comment
-              </button>
-            </form>
-            
-            {/* Sample Comments */}
-            <div className="space-y-6">
-              <div className="border-b border-gray-700 pb-6">
-                <div className="flex items-center mb-3">
-                  <div className="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center text-lg font-bold text-white">
-                    K
-                  </div>
-                  <div className="ml-4">
-                    <h4 className="text-sm font-medium text-white">Khurram Shahzad</h4>
-                    <p className="text-xs text-gray-400">August 1, 2025 at 11:02 pm</p>
-                  </div>
-                </div>
-                <p className="text-gray-300">Great movie! I really enjoyed the storyline and the acting was superb. Highly recommended!</p>
-              </div>
-              
-              <div className="border-b border-gray-700 pb-6">
-                <div className="flex items-center mb-3">
-                  <div className="h-10 w-10 rounded-full bg-green-600 flex items-center justify-center text-lg font-bold text-white">
-                    A
-                  </div>
-                  <div className="ml-4">
-                    <h4 className="text-sm font-medium text-white">Ali Hassan</h4>
-                    <p className="text-xs text-gray-400">July 28, 2025 at 6:44 pm</p>
-                  </div>
-                </div>
-                <p className="text-gray-300">The cinematography was amazing. I would definitely recommend watching this movie!</p>
-              </div>
-              
-              <div className="border-b border-gray-700 pb-6">
-                <div className="flex items-center mb-3">
-                  <div className="h-10 w-10 rounded-full bg-purple-600 flex items-center justify-center text-lg font-bold text-white">
-                    M
-                  </div>
-                  <div className="ml-4">
-                    <h4 className="text-sm font-medium text-white">Malik Waqas</h4>
-                    <p className="text-xs text-gray-400">July 30, 2025 at 5:39 pm</p>
-                  </div>
-                </div>
-                <p className="text-gray-300">Excellent movie with great action sequences. The plot was engaging from start to finish.</p>
+              <div>
+                <p><strong>Language:</strong> {movie.original_language?.toUpperCase() || 'N/A'}</p>
+                <p><strong>Status:</strong> {movie.status || 'N/A'}</p>
+                <p><strong>Budget:</strong> {movie.budget ? `$${movie.budget.toLocaleString()}` : 'N/A'}</p>
+                <p><strong>Revenue:</strong> {movie.revenue ? `$${movie.revenue.toLocaleString()}` : 'N/A'}</p>
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Similar Movies */}
+        {similarMovies.length > 0 && (
+          <div className="mb-12">
+            <h2 className="text-2xl font-bold text-white mb-6">Similar Movies</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+              {similarMovies.slice(0, 12).map((similarMovie) => (
+                <Link
+                  key={similarMovie.imdb_id}
+                  href={`/movie/${similarMovie.imdb_id}`}
+                  className="group block transition-all duration-300 hover:transform hover:scale-105"
+                >
+                  <div className="relative aspect-[2/3] rounded-lg overflow-hidden shadow-lg group-hover:shadow-2xl transition-all duration-300">
+                    <Image
+                      src={similarMovie.poster_path ? getImageUrl(similarMovie.poster_path) : '/placeholder.jpg'}
+                      alt={similarMovie.title}
+                      fill
+                      className="object-cover transition-transform duration-300 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div className="absolute bottom-0 left-0 right-0 p-3 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                      <h3 className="text-white font-semibold text-sm mb-1 truncate">{similarMovie.title}</h3>
+                      <div className="flex items-center justify-between text-xs text-gray-300">
+                        <span>{getYear(similarMovie.release_date)}</span>
+                        <div className="flex items-center">
+                          <span className="text-yellow-400">⭐</span>
+                          <span className="ml-1">{similarMovie.vote_average?.toFixed(1) || 'N/A'}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Footer Info */}
+        <div className="text-center py-8 border-t border-gray-700">
+          <p className="text-gray-400 text-sm">
+            © 2024 CineVerse - Watch Online Movies. All rights reserved.
+          </p>
+          <p className="text-gray-500 text-xs mt-2">
+            Disclaimer: All content is provided by third-party sources. We do not host any content.
+          </p>
         </div>
       </div>
     </div>

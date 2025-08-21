@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { getMoviesByImdbIds, getImageUrl, getYear } from "./api/tmdb";
 import { getMoviesForHomepageCategory, getMoviesForGenreCategory, getMovieCount } from "./data/bulkMovieIds";
-import { MOVIE_CATEGORIES, getHomepageCategories, getGenreCategories, type CategoryKey } from "./data/movieCategories";
+import { MOVIE_CATEGORIES, getAllCategoryKeys, type CategoryKey } from "./data/movieCategories";
 import type { Movie } from "./api/tmdb";
 
 export default function Home() {
@@ -13,14 +13,34 @@ export default function Home() {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
   const [allMoviesCache, setAllMoviesCache] = useState<Record<CategoryKey, Movie[]>>({} as Record<CategoryKey, Movie[]>);
-  const [showGenres, setShowGenres] = useState(false);
+  const [heroMovies, setHeroMovies] = useState<Movie[]>([]);
+  const [currentHeroIndex, setCurrentHeroIndex] = useState(0);
 
-  const homepageCategories = getHomepageCategories();
-  const genreCategories = getGenreCategories();
+  const allCategories = getAllCategoryKeys();
 
   useEffect(() => {
     loadMoviesForCategory(activeCategory);
+    loadHeroMovies();
   }, [activeCategory]);
+
+  // Auto-rotate hero movies
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentHeroIndex((prev) => (prev + 1) % heroMovies.length);
+    }, 5000); // Change every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [heroMovies.length]);
+
+  const loadHeroMovies = async () => {
+    try {
+      const heroMovieIds = getMoviesForHomepageCategory('FEATURED', 10);
+      const heroMoviesData = await getMoviesByImdbIds(heroMovieIds);
+      setHeroMovies(heroMoviesData);
+    } catch (error) {
+      console.error('Error loading hero movies:', error);
+    }
+  };
 
   const loadMoviesForCategory = async (category: CategoryKey) => {
     setLoading(true);
@@ -35,6 +55,8 @@ export default function Home() {
     try {
       let movieIds: string[];
       
+      // Check if it's a homepage category or genre category
+      const homepageCategories = ['FEATURED', 'TRENDING', 'NEW_RELEASES', 'TOP_RATED'];
       if (homepageCategories.includes(category)) {
         movieIds = getMoviesForHomepageCategory(category, 20);
       } else {
@@ -64,10 +86,33 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
-      {/* Hero Section */}
+      {/* Hero Section with Background Slider */}
       <div className="relative h-[70vh] flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-900/80 to-purple-900/80 z-10"></div>
-        <div className="relative z-20 text-center text-white px-4">
+        {/* Background Movie Slider */}
+        {heroMovies.length > 0 && (
+          <div className="absolute inset-0">
+            {heroMovies.map((movie, index) => (
+              <div
+                key={movie.imdb_id}
+                className={`absolute inset-0 transition-opacity duration-1000 ${
+                  index === currentHeroIndex ? 'opacity-100' : 'opacity-0'
+                }`}
+              >
+                <Image
+                  src={movie.backdrop_path ? getImageUrl(movie.backdrop_path, 'original') : '/placeholder.jpg'}
+                  alt={movie.title}
+                  fill
+                  className="object-cover"
+                  priority={index === 0}
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-transparent"></div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Hero Content */}
+        <div className="relative z-20 text-center text-white px-4 max-w-4xl mx-auto">
           <h1 className="text-5xl md:text-7xl font-bold mb-4 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
             CineVerse
           </h1>
@@ -75,20 +120,35 @@ export default function Home() {
             Discover our massive collection of {getMovieCount().toLocaleString()} movies. Watch, download, and explore.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button 
-              onClick={() => setShowGenres(!showGenres)}
+            <Link 
+              href="#movies"
               className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105"
             >
-              {showGenres ? 'Show Featured' : 'Browse Genres'}
-            </button>
+              Explore Movies
+            </Link>
             <Link 
               href="#movies"
               className="bg-white/10 hover:bg-white/20 text-white px-8 py-3 rounded-lg font-semibold transition-all duration-200 backdrop-blur-sm"
             >
-              Explore Movies
+              Browse All
             </Link>
           </div>
         </div>
+
+        {/* Hero Navigation Dots */}
+        {heroMovies.length > 0 && (
+          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-30 flex space-x-2">
+            {heroMovies.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentHeroIndex(index)}
+                className={`w-3 h-3 rounded-full transition-all duration-200 ${
+                  currentHeroIndex === index ? 'bg-purple-500' : 'bg-white/50 hover:bg-white/75'
+                }`}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Main Content */}
@@ -97,7 +157,7 @@ export default function Home() {
         <div className="mb-12">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-3xl font-bold text-white">
-              {showGenres ? 'Browse by Genre' : 'Featured Collections'}
+              Movie Collections
             </h2>
             <div className="text-gray-400">
               {getMovieCount().toLocaleString()} movies available
@@ -106,7 +166,7 @@ export default function Home() {
           
           {/* Category Tabs */}
           <div className="flex flex-wrap gap-3">
-            {(showGenres ? genreCategories : homepageCategories).map((category) => {
+            {allCategories.map((category) => {
               const info = getCategoryInfo(category);
               return (
                 <button
