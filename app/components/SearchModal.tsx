@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { searchMoviesByTitle } from "../data/bulkMovieIds";
 import { getMoviesByImdbIds, getImageUrl, getYear } from "../api/tmdb";
 import type { Movie } from "../api/tmdb";
@@ -125,9 +126,11 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                       className="w-full flex items-center space-x-3 p-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors text-left"
                     >
                       <div className="relative w-12 h-16 bg-gray-700 rounded overflow-hidden flex-shrink-0">
-                        <img
-                          src={movie.poster_path ? getImageUrl(movie.poster_path) : '/placeholder.jpg'}
+                        <Image
+                          src={movie.poster_path ? getImageUrl(movie.poster_path) : '/placeholder.svg'}
                           alt={movie.title}
+                          width={48}
+                          height={64}
                           className="w-full h-full object-cover"
                         />
                       </div>
@@ -151,10 +154,10 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
             <div className="bg-purple-900/20 border border-purple-500/30 rounded-lg p-4 mb-6">
               <h4 className="text-purple-400 font-semibold mb-2">💡 Search Tips:</h4>
               <ul className="text-gray-300 text-sm space-y-1">
-                <li>• Use movie titles (e.g., "The Godfather")</li>
-                <li>• Try partial names (e.g., "Batman")</li>
-                <li>• Search by year (e.g., "2023")</li>
-                <li>• Use actor names (e.g., "Tom Hanks")</li>
+                <li>• Use movie titles (e.g., &quot;The Godfather&quot;)</li>
+                <li>• Try partial names (e.g., &quot;Batman&quot;)</li>
+                <li>• Search by year (e.g., &quot;2023&quot;)</li>
+                <li>• Use actor names (e.g., &quot;Tom Hanks&quot;)</li>
               </ul>
             </div>
           </form>

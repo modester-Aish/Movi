@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { use } from "react";
 import { getMovieByImdbId, getSimilarMovies, getImageUrl, getYear } from "../../api/tmdb";
-import type { Movie } from "../../api/tmdb";
+import type { Movie, MovieListItem } from "../../api/tmdb";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -16,7 +16,7 @@ interface MoviePageProps {
 export default function MoviePage({ params }: MoviePageProps) {
   const { imdbId } = use(params);
   const [movie, setMovie] = useState<Movie | null>(null);
-  const [similarMovies, setSimilarMovies] = useState<any[]>([]);
+  const [similarMovies, setSimilarMovies] = useState<MovieListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activePlayer, setActivePlayer] = useState(1);
@@ -101,7 +101,7 @@ export default function MoviePage({ params }: MoviePageProps) {
             <div className="lg:w-1/3">
               <div className="relative aspect-[2/3] rounded-lg overflow-hidden shadow-xl">
                 <Image
-                  src={movie.poster_path ? getImageUrl(movie.poster_path) : '/placeholder.jpg'}
+                  src={movie.poster_path ? getImageUrl(movie.poster_path) : '/placeholder.svg'}
                   alt={movie.title}
                   fill
                   className="object-cover"
@@ -261,7 +261,7 @@ export default function MoviePage({ params }: MoviePageProps) {
                 >
                   <div className="relative aspect-[2/3] rounded-lg overflow-hidden shadow-lg group-hover:shadow-2xl transition-all duration-300">
                     <Image
-                      src={similarMovie.poster_path ? getImageUrl(similarMovie.poster_path) : '/placeholder.jpg'}
+                      src={similarMovie.poster_path ? getImageUrl(similarMovie.poster_path) : '/placeholder.svg'}
                       alt={similarMovie.title}
                       fill
                       className="object-cover transition-transform duration-300 group-hover:scale-110"

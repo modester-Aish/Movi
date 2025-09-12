@@ -11,13 +11,13 @@ export type Movie = {
   poster_path: string;
   release_date: string;
   genres: { id: number; name: string }[];
-  runtime?: number;
   vote_average?: number;
+  backdrop_path?: string;
+  runtime?: number;
   original_language?: string;
   status?: string;
   budget?: number;
   revenue?: number;
-  backdrop_path?: string;
 };
 
 type Video = {
@@ -29,13 +29,14 @@ type Video = {
   official: boolean;
 };
 
-type MovieListItem = {
+export type MovieListItem = {
   id: number;
   imdb_id?: string;
   title: string;
   poster_path: string;
   release_date: string;
   genre_ids: number[];
+  vote_average?: number;
 };
 
 export async function getMovieByImdbId(imdbId: string): Promise<Movie | null> {
@@ -66,13 +67,6 @@ export async function getMovieByImdbId(imdbId: string): Promise<Movie | null> {
       poster_path: movieData.poster_path,
       release_date: movieData.release_date,
       genres: movieData.genres || [],
-      runtime: movieData.runtime,
-      vote_average: movieData.vote_average,
-      original_language: movieData.original_language,
-      status: movieData.status,
-      budget: movieData.budget,
-      revenue: movieData.revenue,
-      backdrop_path: movieData.backdrop_path,
     };
   } catch (error) {
     console.error('Error fetching movie by IMDB ID:', error);
@@ -88,7 +82,7 @@ export async function getPopularMovies(page: number = 1): Promise<MovieListItem[
     
     // For each movie, get its IMDB ID
     const moviesWithImdbIds = await Promise.all(
-      data.results.map(async (movie: any) => {
+      data.results.map(async (movie: Record<string, unknown>) => {
         try {
           const detailsUrl = `${TMDB_BASE_URL}/movie/${movie.id}?api_key=${TMDB_API_KEY}`;
           const detailsResponse = await fetch(detailsUrl);
@@ -107,33 +101,6 @@ export async function getPopularMovies(page: number = 1): Promise<MovieListItem[
     return moviesWithImdbIds;
   } catch (error) {
     console.error('Error fetching popular movies:', error);
-    return [];
-  }
-}
-
-export async function getMoviesByImdbIds(imdbIds: string[]): Promise<Movie[]> {
-  try {
-    // Process in batches to avoid overwhelming the API
-    const batchSize = 10;
-    const movies: Movie[] = [];
-    
-    for (let i = 0; i < imdbIds.length; i += batchSize) {
-      const batch = imdbIds.slice(i, i + batchSize);
-      const batchPromises = batch.map(id => getMovieByImdbId(id));
-      const batchResults = await Promise.all(batchPromises);
-      
-      // Filter out null results and add to movies array
-      movies.push(...batchResults.filter((movie): movie is Movie => movie !== null));
-      
-      // Add a small delay to avoid rate limiting
-      if (i + batchSize < imdbIds.length) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      }
-    }
-    
-    return movies;
-  } catch (error) {
-    console.error('Error fetching movies by IMDB IDs:', error);
     return [];
   }
 }
@@ -158,7 +125,7 @@ export async function getSimilarMovies(movieId: number): Promise<MovieListItem[]
     
     // For each movie, get its IMDB ID
     const moviesWithImdbIds = await Promise.all(
-      data.results.slice(0, 6).map(async (movie: any) => {
+      data.results.slice(0, 6).map(async (movie: Record<string, unknown>) => {
         try {
           const detailsUrl = `${TMDB_BASE_URL}/movie/${movie.id}?api_key=${TMDB_API_KEY}`;
           const detailsResponse = await fetch(detailsUrl);
@@ -195,6 +162,9 @@ export async function getMoviesByMultipleImdbIds(imdbIds: string[]): Promise<Mov
     return [];
   }
 }
+
+// Alias for getMoviesByMultipleImdbIds for backward compatibility
+export const getMoviesByImdbIds = getMoviesByMultipleImdbIds;
 
 // Fetch movie videos (trailers, teasers, etc.) from TMDB
 export async function getMovieVideos(movieId: number): Promise<Video[]> {

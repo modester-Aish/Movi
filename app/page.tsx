@@ -3,8 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { getMoviesByImdbIds, getImageUrl, getYear } from "./api/tmdb";
-import { getMoviesForHomepageCategory, getMoviesForGenreCategory, getMovieCount } from "./data/bulkMovieIds";
+import { getMoviesByImdbIds, getImageUrl, getFullImageUrl, getYear } from "./api/tmdb";
+import { getTotalMovieCount, getRandomMovieIds } from "./utils/movieIds";
 import { MOVIE_CATEGORIES, getAllCategoryKeys, type CategoryKey } from "./data/movieCategories";
 import type { Movie } from "./api/tmdb";
 
@@ -15,12 +15,15 @@ export default function Home() {
   const [allMoviesCache, setAllMoviesCache] = useState<Record<CategoryKey, Movie[]>>({} as Record<CategoryKey, Movie[]>);
   const [heroMovies, setHeroMovies] = useState<Movie[]>([]);
   const [currentHeroIndex, setCurrentHeroIndex] = useState(0);
+  const [totalMovies, setTotalMovies] = useState(0);
 
   const allCategories = getAllCategoryKeys();
 
   useEffect(() => {
     loadMoviesForCategory(activeCategory);
     loadHeroMovies();
+    loadTotalMovieCount();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeCategory]);
 
   // Auto-rotate hero movies
@@ -34,11 +37,20 @@ export default function Home() {
 
   const loadHeroMovies = async () => {
     try {
-      const heroMovieIds = getMoviesForHomepageCategory('FEATURED', 10);
+      const heroMovieIds = await getRandomMovieIds(10);
       const heroMoviesData = await getMoviesByImdbIds(heroMovieIds);
       setHeroMovies(heroMoviesData);
     } catch (error) {
       console.error('Error loading hero movies:', error);
+    }
+  };
+
+  const loadTotalMovieCount = async () => {
+    try {
+      const count = await getTotalMovieCount();
+      setTotalMovies(count);
+    } catch (error) {
+      console.error('Error loading total movie count:', error);
     }
   };
 
@@ -53,16 +65,8 @@ export default function Home() {
     }
 
     try {
-      let movieIds: string[];
-      
-      // Check if it's a homepage category or genre category
-      const homepageCategories = ['FEATURED', 'TRENDING', 'NEW_RELEASES', 'TOP_RATED'];
-      if (homepageCategories.includes(category)) {
-        movieIds = getMoviesForHomepageCategory(category, 20);
-      } else {
-        movieIds = getMoviesForGenreCategory(category, 20);
-      }
-      
+      // Get random movie IDs for each category
+      const movieIds = await getRandomMovieIds(20);
       const moviesData = await getMoviesByImdbIds(movieIds);
       
       // Cache the data
@@ -99,7 +103,7 @@ export default function Home() {
                 }`}
               >
                 <Image
-                  src={movie.backdrop_path ? getImageUrl(movie.backdrop_path, 'original') : '/placeholder.jpg'}
+                  src={movie.backdrop_path ? getFullImageUrl(movie.backdrop_path) : '/placeholder.svg'}
                   alt={movie.title}
                   fill
                   className="object-cover"
@@ -117,7 +121,7 @@ export default function Home() {
             CineVerse
           </h1>
           <p className="text-xl md:text-2xl mb-8 text-gray-200 max-w-2xl mx-auto">
-            Discover our massive collection of {getMovieCount().toLocaleString()} movies. Watch, download, and explore.
+            Discover our massive collection of {totalMovies.toLocaleString()} movies. Watch, download, and explore.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link 
@@ -160,7 +164,7 @@ export default function Home() {
               Movie Collections
             </h2>
             <div className="text-gray-400">
-              {getMovieCount().toLocaleString()} movies available
+              {totalMovies.toLocaleString()} movies available
             </div>
           </div>
           
@@ -217,7 +221,7 @@ export default function Home() {
                 >
                   <div className="relative aspect-[2/3] rounded-lg overflow-hidden shadow-lg group-hover:shadow-2xl transition-all duration-300">
                     <Image 
-                      src={movie.poster_path ? getImageUrl(movie.poster_path) : '/placeholder.jpg'}
+                      src={movie.poster_path ? getImageUrl(movie.poster_path) : '/placeholder.svg'}
                       alt={movie.title}
                       fill
                       className="object-cover transition-transform duration-300 group-hover:scale-110"

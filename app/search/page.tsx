@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -8,7 +8,7 @@ import { getMoviesByImdbIds, getImageUrl, getYear } from "../api/tmdb";
 import { searchMoviesByTitle, getRandomMovieIds } from "../data/bulkMovieIds";
 import type { Movie } from "../api/tmdb";
 
-export default function SearchResultsPage() {
+function SearchResultsContent() {
   const searchParams = useSearchParams();
   const query = searchParams.get('q') || '';
   const [results, setResults] = useState<Movie[]>([]);
@@ -78,7 +78,7 @@ export default function SearchResultsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col items-center justify-center min-h-[60vh]">
             <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-purple-500"></div>
-            <p className="mt-4 text-gray-400 text-lg">Searching for "{query}"...</p>
+            <p className="mt-4 text-gray-400 text-lg">Searching for &quot;{query}&quot;...</p>
           </div>
         </div>
       </div>
@@ -98,7 +98,7 @@ export default function SearchResultsPage() {
           </h1>
           <p className="text-gray-400">
             {results.length > 0 
-              ? `Found ${results.length} movie${results.length !== 1 ? 's' : ''} for "${query}"`
+              ? `Found ${results.length} movie${results.length !== 1 ? 's' : ''} for &quot;${query}&quot;`
               : `No movies found for "${query}"`
             }
           </p>
@@ -117,7 +117,7 @@ export default function SearchResultsPage() {
             <div className="text-6xl mb-4">🔍</div>
             <h2 className="text-2xl font-bold text-white mb-2">No movies found</h2>
             <p className="text-gray-400 mb-6">
-              We couldn't find any movies matching "{query}"
+              We couldn&apos;t find any movies matching &quot;{query}&quot;
             </p>
             <div className="space-y-2 text-gray-500">
               <p>Try:</p>
@@ -143,7 +143,7 @@ export default function SearchResultsPage() {
                 {/* Movie Poster */}
                 <div className="relative aspect-[2/3] bg-gray-700">
                   <Image
-                    src={movie.poster_path ? getImageUrl(movie.poster_path) : '/placeholder.jpg'}
+                    src={movie.poster_path ? getImageUrl(movie.poster_path) : '/placeholder.svg'}
                     alt={movie.title}
                     fill
                     className="object-cover group-hover:brightness-110 transition-all duration-300"
@@ -182,5 +182,22 @@ export default function SearchResultsPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function SearchResultsPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex flex-col items-center justify-center min-h-[60vh]">
+            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-purple-500"></div>
+            <p className="mt-4 text-gray-400 text-lg">Loading...</p>
+          </div>
+        </div>
+      </div>
+    }>
+      <SearchResultsContent />
+    </Suspense>
   );
 }

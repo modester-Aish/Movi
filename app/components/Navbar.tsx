@@ -30,6 +30,9 @@ export default function Navbar() {
               <Link href="#" className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">
                 Collections
               </Link>
+              <Link href="/admin" className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                Admin
+              </Link>
             </div>
           </div>
 
@@ -82,6 +85,9 @@ export default function Navbar() {
             </Link>
             <Link href="#" className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium">
               Collections
+            </Link>
+            <Link href="/admin" className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium">
+              Admin
             </Link>
             <div className="pt-4 pb-3 border-t border-gray-700">
               <div className="px-3 py-2">
