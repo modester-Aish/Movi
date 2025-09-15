@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { use } from "react";
-import { getMovieByImdbId, getSimilarMovies, getImageUrl, getYear, getImageUrlWithFallback } from "../../api/tmdb";
-import MovieImage from "../../components/MovieImage";
+import { getMovieByImdbId, getSimilarMovies, getYear } from "../../api/tmdb";
 import type { Movie, MovieListItem } from "../../api/tmdb";
 import Link from "next/link";
 import Image from "next/image";

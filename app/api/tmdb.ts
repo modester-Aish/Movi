@@ -227,7 +227,7 @@ export async function getMoviesByMultipleImdbIds(imdbIds: string[]): Promise<Mov
     // Filter out any null results and movies without images
     const validMovies = movies.filter((movie): movie is Movie => 
       movie !== null && 
-      movie.poster_path && 
+      typeof movie.poster_path === 'string' && 
       movie.poster_path.trim() !== ''
     );
     

@@ -3,11 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { getMoviesByImdbIds, getImageUrl, getFullImageUrl, getYear, getImageUrlWithFallback } from "./api/tmdb";
+import { getMoviesByImdbIds, getYear } from "./api/tmdb";
 import { getTotalMovieCount, getRandomMovieIds } from "./utils/movieIds";
 import { MOVIE_CATEGORIES, getAllCategoryKeys, type CategoryKey } from "./data/movieCategories";
 import type { Movie } from "./api/tmdb";
-import MovieImage from "./components/MovieImage";
 
 export default function Home() {
   const [activeCategory, setActiveCategory] = useState<CategoryKey>('FEATURED');

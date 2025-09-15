@@ -4,7 +4,15 @@ import { useState, useEffect } from "react";
 import { getMovieByImdbId } from "../api/tmdb";
 
 export default function TestMovie() {
-  const [movie, setMovie] = useState<any>(null);
+  const [movie, setMovie] = useState<{
+    title?: string;
+    imdb_id?: string;
+    id?: number;
+    release_date?: string;
+    poster_path?: string | null;
+    overview?: string;
+    genres?: Array<{ name: string }>;
+  } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -55,7 +63,7 @@ export default function TestMovie() {
             <p><strong>Release Date:</strong> {movie.release_date}</p>
             <p><strong>Poster Path:</strong> {movie.poster_path || 'null'}</p>
             <p><strong>Overview:</strong> {movie.overview}</p>
-            <p><strong>Genres:</strong> {movie.genres?.map((g: any) => g.name).join(', ') || 'none'}</p>
+            <p><strong>Genres:</strong> {movie.genres?.map((g: { name: string }) => g.name).join(', ') || 'none'}</p>
           </div>
           
           <div className="mt-6">

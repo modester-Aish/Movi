@@ -4,9 +4,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { searchMoviesByTitle } from "../data/bulkMovieIds";
-import { getMoviesByImdbIds, getImageUrl, getYear, getImageUrlWithFallback } from "../api/tmdb";
+import { getMoviesByImdbIds, getYear } from "../api/tmdb";
 import type { Movie } from "../api/tmdb";
-import MovieImage from "./MovieImage";
 
 interface SearchModalProps {
   isOpen: boolean;

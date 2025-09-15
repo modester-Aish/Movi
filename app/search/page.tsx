@@ -4,8 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { getMoviesByImdbIds, getImageUrl, getYear, getImageUrlWithFallback } from "../api/tmdb";
-import MovieImage from "../components/MovieImage";
+import { getMoviesByImdbIds, getYear } from "../api/tmdb";
 import { searchMoviesByTitle, getRandomMovieIds } from "../data/bulkMovieIds";
 import type { Movie } from "../api/tmdb";
 

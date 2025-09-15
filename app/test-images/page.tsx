@@ -4,12 +4,6 @@ import Image from "next/image";
 import { getImageUrl, getFullImageUrl } from "../api/tmdb";
 
 export default function TestImages() {
-  // Test with some known working movie IDs
-  const testMovies = [
-    { imdbId: 'tt0021577', title: 'Test Movie 1' },
-    { imdbId: 'tt0111161', title: 'The Shawshank Redemption' },
-    { imdbId: 'tt0068646', title: 'The Godfather' },
-  ];
 
   const testPosterPath = '/kqjL17yufvn9OVLyXYpvtyrFfak.jpg'; // Known working poster path
   const testBackdropPath = '/hZkgoQYus5vegHoetLkCJzb17zJ.jpg'; // Known working backdrop path

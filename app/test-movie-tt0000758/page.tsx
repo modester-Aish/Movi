@@ -6,7 +6,15 @@ import Image from "next/image";
 import { getImageUrl, getFullImageUrl, getImageUrlWithFallback } from "../api/tmdb";
 
 export default function TestMovieTT0000758() {
-  const [movie, setMovie] = useState<any>(null);
+  const [movie, setMovie] = useState<{
+    title?: string;
+    imdb_id?: string;
+    id?: number;
+    release_date?: string;
+    poster_path?: string | null;
+    backdrop_path?: string | null;
+    overview?: string;
+  } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

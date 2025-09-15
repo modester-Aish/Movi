@@ -67,6 +67,7 @@ export default function MovieImage({
         {...imageProps}
         fill
         sizes={sizes}
+        alt={alt}
       />
     );
   }
@@ -76,6 +77,7 @@ export default function MovieImage({
       {...imageProps}
       width={width || 300}
       height={height || 450}
+      alt={alt}
     />
   );
 }

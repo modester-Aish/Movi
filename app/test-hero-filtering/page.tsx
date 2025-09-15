@@ -5,9 +5,27 @@ import { getMoviesByImdbIds } from "../api/tmdb";
 import { getRandomMovieIds } from "../utils/movieIds";
 
 export default function TestHeroFiltering() {
-  const [allMovies, setAllMovies] = useState<any[]>([]);
-  const [moviesWithPosters, setMoviesWithPosters] = useState<any[]>([]);
-  const [moviesWithBackdrops, setMoviesWithBackdrops] = useState<any[]>([]);
+  const [allMovies, setAllMovies] = useState<Array<{
+    imdb_id: string;
+    title: string;
+    poster_path?: string | null;
+    backdrop_path?: string | null;
+    release_date?: string;
+  }>>([]);
+  const [moviesWithPosters, setMoviesWithPosters] = useState<Array<{
+    imdb_id: string;
+    title: string;
+    poster_path?: string | null;
+    backdrop_path?: string | null;
+    release_date?: string;
+  }>>([]);
+  const [moviesWithBackdrops, setMoviesWithBackdrops] = useState<Array<{
+    imdb_id: string;
+    title: string;
+    poster_path?: string | null;
+    backdrop_path?: string | null;
+    release_date?: string;
+  }>>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

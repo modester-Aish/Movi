@@ -3,7 +3,18 @@
 import { useState, useEffect } from "react";
 
 export default function TestAPI() {
-  const [apiTest, setApiTest] = useState<any>(null);
+  const [apiTest, setApiTest] = useState<{
+    status?: number;
+    data?: {
+      title?: string;
+      poster_path?: string | null;
+      backdrop_path?: string | null;
+      [key: string]: unknown;
+    };
+    posterUrl?: string | null;
+    backdropUrl?: string | null;
+    error?: string;
+  } | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -22,7 +33,7 @@ export default function TestAPI() {
         });
       } catch (error) {
         console.error('API Test Error:', error);
-        setApiTest({ error: error.message });
+        setApiTest({ error: error instanceof Error ? error.message : 'Unknown error' });
       } finally {
         setLoading(false);
       }
@@ -68,7 +79,7 @@ export default function TestAPI() {
                 src={apiTest.posterUrl} 
                 alt="Test Poster" 
                 className="w-48 h-72 object-cover border border-white"
-                onError={(e) => {
+                onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
                   console.log('Direct image load error:', e);
                   e.currentTarget.src = '/placeholder.svg';
                 }}
