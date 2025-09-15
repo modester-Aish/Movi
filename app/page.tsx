@@ -3,10 +3,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { getMoviesByImdbIds, getImageUrl, getFullImageUrl, getYear } from "./api/tmdb";
+import { getMoviesByImdbIds, getImageUrl, getFullImageUrl, getYear, getImageUrlWithFallback } from "./api/tmdb";
 import { getTotalMovieCount, getRandomMovieIds } from "./utils/movieIds";
 import { MOVIE_CATEGORIES, getAllCategoryKeys, type CategoryKey } from "./data/movieCategories";
 import type { Movie } from "./api/tmdb";
+import MovieImage from "./components/MovieImage";
 
 export default function Home() {
   const [activeCategory, setActiveCategory] = useState<CategoryKey>('FEATURED');
@@ -37,9 +38,29 @@ export default function Home() {
 
   const loadHeroMovies = async () => {
     try {
-      const heroMovieIds = await getRandomMovieIds(10);
+      // Fetch more IDs to account for filtering
+      const heroMovieIds = await getRandomMovieIds(50);
+      console.log('Hero movie IDs:', heroMovieIds);
       const heroMoviesData = await getMoviesByImdbIds(heroMovieIds);
-      setHeroMovies(heroMoviesData);
+      console.log('Hero movies data (filtered):', heroMoviesData);
+      
+      // Filter for movies with BOTH poster AND backdrop images working
+      const moviesWithAllImages = heroMoviesData.filter(movie => {
+        const hasPoster = movie.poster_path && 
+                         movie.poster_path.trim() !== '' && 
+                         movie.poster_path !== null;
+        
+        const hasBackdrop = movie.backdrop_path && 
+                           movie.backdrop_path.trim() !== '' && 
+                           movie.backdrop_path !== null;
+        
+        return hasPoster && hasBackdrop;
+      });
+      
+      console.log(`Hero section: ${heroMoviesData.length} movies with posters, ${moviesWithAllImages.length} with BOTH poster and backdrop images`);
+      
+      // Take only the first 10 with all images working
+      setHeroMovies(moviesWithAllImages.slice(0, 10));
     } catch (error) {
       console.error('Error loading hero movies:', error);
     }
@@ -65,9 +86,11 @@ export default function Home() {
     }
 
     try {
-      // Get random movie IDs for each category
-      const movieIds = await getRandomMovieIds(20);
+      // Get more movie IDs to account for filtering
+      const movieIds = await getRandomMovieIds(30);
+      console.log('Movie IDs for category', category, ':', movieIds);
       const moviesData = await getMoviesByImdbIds(movieIds);
+      console.log('Movies data for category', category, ' (filtered):', moviesData);
       
       // Cache the data
       setAllMoviesCache(prev => ({
@@ -93,7 +116,7 @@ export default function Home() {
       {/* Hero Section with Background Slider */}
       <div className="relative h-[70vh] flex items-center justify-center overflow-hidden">
         {/* Background Movie Slider */}
-        {heroMovies.length > 0 && (
+        {heroMovies.length > 0 ? (
           <div className="absolute inset-0">
             {heroMovies.map((movie, index) => (
               <div
@@ -103,16 +126,24 @@ export default function Home() {
                 }`}
               >
                 <Image
-                  src={movie.backdrop_path ? getFullImageUrl(movie.backdrop_path) : '/placeholder.svg'}
+                  src={`https://image.tmdb.org/t/p/original${movie.backdrop_path}`}
                   alt={movie.title}
                   fill
                   className="object-cover"
                   priority={index === 0}
+                  onError={(e) => {
+                    console.log('Hero image error:', movie.title, movie.backdrop_path);
+                    const target = e.target as HTMLImageElement;
+                    target.src = '/placeholder.svg';
+                  }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-transparent"></div>
               </div>
             ))}
           </div>
+        ) : (
+          /* Fallback background when no hero movies with backdrops */
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900"></div>
         )}
 
         {/* Hero Content */}
@@ -140,7 +171,7 @@ export default function Home() {
         </div>
 
         {/* Hero Navigation Dots */}
-        {heroMovies.length > 0 && (
+        {heroMovies.length > 1 && (
           <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-30 flex space-x-2">
             {heroMovies.map((_, index) => (
               <button
@@ -221,10 +252,15 @@ export default function Home() {
                 >
                   <div className="relative aspect-[2/3] rounded-lg overflow-hidden shadow-lg group-hover:shadow-2xl transition-all duration-300">
                     <Image 
-                      src={movie.poster_path ? getImageUrl(movie.poster_path) : '/placeholder.svg'}
+                      src={movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : '/placeholder.svg'}
                       alt={movie.title}
                       fill
                       className="object-cover transition-transform duration-300 group-hover:scale-110"
+                      onError={(e) => {
+                        console.log('Movie poster error:', movie.title, movie.poster_path);
+                        const target = e.target as HTMLImageElement;
+                        target.src = '/placeholder.svg';
+                      }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     <div className="absolute bottom-0 left-0 right-0 p-4 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">

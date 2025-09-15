@@ -8,11 +8,11 @@ export type Movie = {
   imdb_id: string;
   title: string;
   overview: string;
-  poster_path: string;
+  poster_path: string | null;
   release_date: string;
   genres: { id: number; name: string }[];
   vote_average?: number;
-  backdrop_path?: string;
+  backdrop_path: string | null;
   runtime?: number;
   original_language?: string;
   status?: string;
@@ -33,10 +33,11 @@ export type MovieListItem = {
   id: number;
   imdb_id?: string;
   title: string;
-  poster_path: string;
+  poster_path: string | null;
   release_date: string;
   genre_ids: number[];
   vote_average?: number;
+  backdrop_path?: string | null;
 };
 
 export async function getMovieByImdbId(imdbId: string): Promise<Movie | null> {
@@ -59,15 +60,37 @@ export async function getMovieByImdbId(imdbId: string): Promise<Movie | null> {
     const detailsResponse = await fetch(detailsUrl);
     const movieData = await detailsResponse.json();
     
-    return {
+    const movie = {
       id: movieData.id,
       imdb_id: imdbId,
       title: movieData.title,
       overview: movieData.overview,
-      poster_path: movieData.poster_path,
+      poster_path: movieData.poster_path || null,
       release_date: movieData.release_date,
       genres: movieData.genres || [],
+      vote_average: movieData.vote_average,
+      backdrop_path: movieData.backdrop_path || null,
+      runtime: movieData.runtime,
+      original_language: movieData.original_language,
+      status: movieData.status,
+      budget: movieData.budget,
+      revenue: movieData.revenue,
     };
+    
+    // Only return movies that have at least a poster image
+    if (!movie.poster_path || movie.poster_path.trim() === '') {
+      console.log('Skipping movie without poster:', movieData.title);
+      return null;
+    }
+    
+    console.log('Fetched movie data for', movieData.title, ':', {
+      poster_path: movie.poster_path,
+      backdrop_path: movie.backdrop_path,
+      hasPoster: !!movie.poster_path,
+      hasBackdrop: !!movie.backdrop_path
+    });
+    
+    return movie;
   } catch (error) {
     console.error('Error fetching movie by IMDB ID:', error);
     return null;
@@ -105,16 +128,55 @@ export async function getPopularMovies(page: number = 1): Promise<MovieListItem[
   }
 }
 
-export function getImageUrl(path: string): string {
-  return `https://image.tmdb.org/t/p/w500${path}`;
+export function getImageUrl(path: string | null | undefined, size: 'w92' | 'w154' | 'w185' | 'w342' | 'w500' | 'w780' | 'original' = 'w500'): string {
+  if (!path || path.trim() === '') {
+    console.log('getImageUrl: No path provided, using placeholder');
+    return '/placeholder.svg';
+  }
+  const url = `https://image.tmdb.org/t/p/${size}${path}`;
+  console.log('getImageUrl: Generated URL:', url);
+  return url;
 }
 
-export function getFullImageUrl(path: string): string {
-  return `https://image.tmdb.org/t/p/original${path}`;
+export function getFullImageUrl(path: string | null | undefined): string {
+  if (!path || path.trim() === '') {
+    console.log('getFullImageUrl: No path provided, using placeholder');
+    return '/placeholder.svg';
+  }
+  const url = `https://image.tmdb.org/t/p/original${path}`;
+  console.log('getFullImageUrl: Generated URL:', url);
+  return url;
 }
+
 
 export function getYear(dateString: string): string {
   return dateString ? new Date(dateString).getFullYear().toString() : '';
+}
+
+// Utility function to check if an image path is valid
+export function isValidImagePath(path: string | null | undefined): boolean {
+  if (!path || path.trim() === '') return false;
+  
+  // Check if it's already a placeholder
+  if (path === '/placeholder.svg') return false;
+  
+  // Check if it's a valid TMDB image path
+  return path.startsWith('/') && path.length > 1;
+}
+
+// Enhanced image URL function with fallback
+export function getImageUrlWithFallback(
+  path: string | null | undefined, 
+  size: 'w92' | 'w154' | 'w185' | 'w342' | 'w500' | 'w780' | 'original' = 'w500'
+): string {
+  console.log('getImageUrlWithFallback called with:', path, 'size:', size);
+  if (!isValidImagePath(path)) {
+    console.log('getImageUrlWithFallback: Invalid path, using placeholder');
+    return '/placeholder.svg';
+  }
+  const url = getImageUrl(path, size);
+  console.log('getImageUrlWithFallback: Returning URL:', url);
+  return url;
 }
 
 export async function getSimilarMovies(movieId: number): Promise<MovieListItem[]> {
@@ -141,7 +203,14 @@ export async function getSimilarMovies(movieId: number): Promise<MovieListItem[]
       })
     );
     
-    return moviesWithImdbIds;
+    // Filter out movies without poster images
+    const moviesWithImages = moviesWithImdbIds.filter(movie => 
+      movie.poster_path && 
+      movie.poster_path.trim() !== ''
+    );
+    
+    console.log(`Filtered similar movies from ${moviesWithImdbIds.length} to ${moviesWithImages.length} with images`);
+    return moviesWithImages;
   } catch (error) {
     console.error('Error fetching similar movies:', error);
     return [];
@@ -155,8 +224,15 @@ export async function getMoviesByMultipleImdbIds(imdbIds: string[]): Promise<Mov
     const moviesPromises = imdbIds.map(imdbId => getMovieByImdbId(imdbId));
     const movies = await Promise.all(moviesPromises);
     
-    // Filter out any null results
-    return movies.filter((movie): movie is Movie => movie !== null);
+    // Filter out any null results and movies without images
+    const validMovies = movies.filter((movie): movie is Movie => 
+      movie !== null && 
+      movie.poster_path && 
+      movie.poster_path.trim() !== ''
+    );
+    
+    console.log(`Filtered ${movies.length} movies down to ${validMovies.length} with images`);
+    return validMovies;
   } catch (error) {
     console.error('Error fetching movies by multiple IMDB IDs:', error);
     return [];

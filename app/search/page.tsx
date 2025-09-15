@@ -4,7 +4,8 @@ import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { getMoviesByImdbIds, getImageUrl, getYear } from "../api/tmdb";
+import { getMoviesByImdbIds, getImageUrl, getYear, getImageUrlWithFallback } from "../api/tmdb";
+import MovieImage from "../components/MovieImage";
 import { searchMoviesByTitle, getRandomMovieIds } from "../data/bulkMovieIds";
 import type { Movie } from "../api/tmdb";
 
@@ -143,10 +144,15 @@ function SearchResultsContent() {
                 {/* Movie Poster */}
                 <div className="relative aspect-[2/3] bg-gray-700">
                   <Image
-                    src={movie.poster_path ? getImageUrl(movie.poster_path) : '/placeholder.svg'}
+                    src={movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : '/placeholder.svg'}
                     alt={movie.title}
                     fill
                     className="object-cover group-hover:brightness-110 transition-all duration-300"
+                    onError={(e) => {
+                      console.log('Search page poster error:', movie.title, movie.poster_path);
+                      const target = e.target as HTMLImageElement;
+                      target.src = '/placeholder.svg';
+                    }}
                   />
                   
                   {/* Play Button Overlay */}

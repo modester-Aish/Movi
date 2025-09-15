@@ -4,8 +4,9 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { searchMoviesByTitle } from "../data/bulkMovieIds";
-import { getMoviesByImdbIds, getImageUrl, getYear } from "../api/tmdb";
+import { getMoviesByImdbIds, getImageUrl, getYear, getImageUrlWithFallback } from "../api/tmdb";
 import type { Movie } from "../api/tmdb";
+import MovieImage from "./MovieImage";
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -127,11 +128,16 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                     >
                       <div className="relative w-12 h-16 bg-gray-700 rounded overflow-hidden flex-shrink-0">
                         <Image
-                          src={movie.poster_path ? getImageUrl(movie.poster_path) : '/placeholder.svg'}
+                          src={movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : '/placeholder.svg'}
                           alt={movie.title}
                           width={48}
                           height={64}
                           className="w-full h-full object-cover"
+                          onError={(e) => {
+                            console.log('Search modal poster error:', movie.title, movie.poster_path);
+                            const target = e.target as HTMLImageElement;
+                            target.src = '/placeholder.svg';
+                          }}
                         />
                       </div>
                       <div className="flex-1 min-w-0">

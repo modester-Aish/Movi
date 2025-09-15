@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { use } from "react";
-import { getMovieByImdbId, getSimilarMovies, getImageUrl, getYear } from "../../api/tmdb";
+import { getMovieByImdbId, getSimilarMovies, getImageUrl, getYear, getImageUrlWithFallback } from "../../api/tmdb";
+import MovieImage from "../../components/MovieImage";
 import type { Movie, MovieListItem } from "../../api/tmdb";
 import Link from "next/link";
 import Image from "next/image";
@@ -31,7 +32,15 @@ export default function MoviePage({ params }: MoviePageProps) {
 
       try {
         setLoading(true);
+        console.log('Loading movie for IMDB ID:', imdbId);
         const movieData = await getMovieByImdbId(imdbId);
+        console.log('Movie data received:', movieData);
+        
+        if (movieData) {
+          console.log('Movie poster path:', movieData.poster_path);
+          console.log('Movie backdrop path:', movieData.backdrop_path);
+        }
+        
         const similarData = movieData ? await getSimilarMovies(movieData.id) : [];
 
         setMovie(movieData);
@@ -101,10 +110,15 @@ export default function MoviePage({ params }: MoviePageProps) {
             <div className="lg:w-1/3">
               <div className="relative aspect-[2/3] rounded-lg overflow-hidden shadow-xl">
                 <Image
-                  src={movie.poster_path ? getImageUrl(movie.poster_path) : '/placeholder.svg'}
+                  src={movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : '/placeholder.svg'}
                   alt={movie.title}
                   fill
                   className="object-cover"
+                  onError={(e) => {
+                    console.log('Movie detail poster error:', movie.title, movie.poster_path);
+                    const target = e.target as HTMLImageElement;
+                    target.src = '/placeholder.svg';
+                  }}
                 />
               </div>
             </div>
@@ -261,10 +275,15 @@ export default function MoviePage({ params }: MoviePageProps) {
                 >
                   <div className="relative aspect-[2/3] rounded-lg overflow-hidden shadow-lg group-hover:shadow-2xl transition-all duration-300">
                     <Image
-                      src={similarMovie.poster_path ? getImageUrl(similarMovie.poster_path) : '/placeholder.svg'}
+                      src={similarMovie.poster_path ? `https://image.tmdb.org/t/p/w500${similarMovie.poster_path}` : '/placeholder.svg'}
                       alt={similarMovie.title}
                       fill
                       className="object-cover transition-transform duration-300 group-hover:scale-110"
+                      onError={(e) => {
+                        console.log('Similar movie poster error:', similarMovie.title, similarMovie.poster_path);
+                        const target = e.target as HTMLImageElement;
+                        target.src = '/placeholder.svg';
+                      }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     <div className="absolute bottom-0 left-0 right-0 p-3 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
