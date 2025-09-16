@@ -4,7 +4,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { generateMovieSEO, generateMovieMetadata } from "../lib/seo";
 import { generateMovieUrl, extractImdbIdFromSlug, isValidMovieSlug } from "../lib/slug";
-import MediaPlayer from "../components/MediaPlayer";
 import { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
@@ -200,13 +199,46 @@ export default async function MoviePage({ params }: MoviePageProps) {
           </div>
         </div>
 
-        {/* Media Player */}
+        {/* Video Player */}
         <div className="mb-8">
-          <MediaPlayer 
-            movieTitle={movie.title}
-            imdbId={imdbId}
-            className="mb-6"
-          />
+          <div className="bg-black rounded-lg overflow-hidden shadow-xl">
+            {/* Player Header */}
+            <div className="bg-gray-900 px-4 py-2">
+              <h3 className="text-white font-semibold text-sm">
+                {movie.title} - VidSrc Player
+              </h3>
+            </div>
+
+            {/* Video Container */}
+            <div className="relative pt-[56.25%] bg-gray-900">
+              <iframe
+                className="absolute top-0 left-0 w-full h-full"
+                src={`https://vidsrc.me/embed/movie?imdb=${imdbId}`}
+                title={`${movie.title} - VidSrc Player`}
+                frameBorder="0"
+                referrerPolicy="origin"
+                allowFullScreen
+                allow="autoplay; fullscreen; picture-in-picture"
+                loading="lazy"
+              />
+            </div>
+
+            {/* Player Instructions */}
+            <div className="bg-yellow-900/20 border-t border-yellow-500/30 p-4">
+              <div className="flex items-start space-x-3">
+                <div className="text-yellow-400 text-lg">💡</div>
+                <div className="text-yellow-400 text-sm">
+                  <p className="font-semibold mb-1">How to Watch:</p>
+                  <ul className="space-y-1 text-xs">
+                    <li>• Close any popup ads that appear</li>
+                    <li>• Click the play button to start the movie</li>
+                    <li>• If buffering occurs, wait a moment then resume</li>
+                    <li>• Use fullscreen for better viewing experience</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Download Links Section */}
