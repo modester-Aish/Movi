@@ -120,10 +120,10 @@ export default function MediaPlayer({ movieTitle, imdbId, className = "" }: Medi
           <div className="text-yellow-400 text-sm">
             <p className="font-semibold mb-1">How to Watch:</p>
             <ul className="space-y-1 text-xs">
-              <li>• Click the play button multiple times if the movie doesn't start</li>
+              <li>• Click the play button multiple times if the movie doesn&apos;t start</li>
               <li>• Close any popup ads that appear</li>
               <li>• If buffering occurs, pause for 5-10 minutes then resume</li>
-              <li>• Try different players if one doesn't work</li>
+              <li>• Try different players if one doesn&apos;t work</li>
             </ul>
           </div>
         </div>

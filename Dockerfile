@@ -1,14 +1,21 @@
-# Use the official Node.js 18 image
-FROM node:18-alpine
+# Use the official Node.js 18 image with Ubuntu base for better compatibility
+FROM node:18-bullseye
 
 # Set working directory
 WORKDIR /app
 
+# Update system packages and install required tools
+RUN apt-get update && \
+    apt-get install -y curl wget apt-utils && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production
+# Clean npm cache and install dependencies
+RUN npm cache clean --force && \
+    npm ci --only=production
 
 # Copy source code
 COPY . .
