@@ -4,7 +4,7 @@ import { getMoviesByImdbIds } from './api/tmdb';
 import { generateMovieUrl } from './lib/slug';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://cineverse.com';
+  const baseUrl = 'https://movies.n123movie.me';
   
   // Static pages
   const staticPages: MetadataRoute.Sitemap = [

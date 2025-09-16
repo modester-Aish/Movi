@@ -43,7 +43,7 @@ export async function generateMetadata({ params }: MoviePageProps): Promise<Meta
       };
     }
 
-    const seoConfig = generateMovieSEO(movie);
+    const seoConfig = generateMovieSEO(movie, 'https://movies.n123movie.me');
     return generateMovieMetadata(seoConfig);
   } catch (error) {
     console.error('Error generating metadata:', error);
@@ -211,16 +211,16 @@ export default async function MoviePage({ params }: MoviePageProps) {
 
             {/* Video Container */}
             <div className="relative pt-[56.25%] bg-gray-900">
-              <iframe
-                className="absolute top-0 left-0 w-full h-full"
-                src={`https://vidsrc.me/embed/movie?imdb=${imdbId}`}
-                title={`${movie.title} - VidSrc Player`}
-                frameBorder="0"
-                referrerPolicy="origin"
-                allowFullScreen
-                allow="autoplay; fullscreen; picture-in-picture"
-                loading="lazy"
-              />
+               <iframe
+                 className="absolute top-0 left-0 w-full h-full"
+                 src={`https://vidsrc.to/embed/movie/${imdbId}`}
+                 title={`${movie.title} - Movie Player`}
+                 frameBorder="0"
+                 referrerPolicy="no-referrer"
+                 allowFullScreen
+                 allow="autoplay; fullscreen; picture-in-picture"
+                 loading="lazy"
+               />
             </div>
 
             {/* Player Instructions */}

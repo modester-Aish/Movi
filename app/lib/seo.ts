@@ -15,34 +15,43 @@ export interface SEOConfig {
   tags?: string[];
 }
 
-export function generateMovieSEO(movie: Movie, baseUrl: string = 'https://cineverse.com'): SEOConfig {
-  const movieUrl = `${baseUrl}/movie/${movie.imdb_id}`;
+export function generateMovieSEO(movie: Movie, baseUrl: string = 'https://movies.n123movie.me'): SEOConfig {
+  // Use your own domain for canonical URL
+  const movieUrl = `${baseUrl}/${movie.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')}-${movie.imdb_id}`;
   const posterUrl = movie.poster_path 
     ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
     : `${baseUrl}/placeholder.svg`;
 
-  // Generate SEO keywords
+  // Generate comprehensive SEO keywords
   const keywords = [
+    `watch ${movie.title} online`,
     `download ${movie.title}`,
-    `watch ${movie.title}`,
-    `${movie.title} online`,
-    `${movie.title} free`,
-    `${movie.title} streaming`,
+    `${movie.title} free streaming`,
     `${movie.title} HD`,
     `${movie.title} 720p`,
     `${movie.title} 1080p`,
+    `${movie.title} online free`,
+    `${movie.title} streaming`,
+    `${movie.title} watch online`,
+    `${movie.title} download free`,
     ...(movie.genres?.map(genre => genre.name) || []),
     ...(movie.release_date ? [movie.release_date.split('-')[0]] : []),
-    'free movies',
-    'online movies',
-    'movie streaming',
-    'HD movies',
-    'download movies'
+    'free movies online',
+    'watch movies online',
+    'download movies HD',
+    'movie streaming free',
+    'online cinema',
+    'HD movies free'
   ];
 
+  // Create SEO-optimized description
+  const description = movie.overview 
+    ? `${movie.overview} Watch ${movie.title} online for free. Download ${movie.title} in HD quality. ${movie.genres?.map(g => g.name).join(', ')} movie from ${movie.release_date?.split('-')[0] || 'N/A'}.`
+    : `Watch ${movie.title} online for free. Download ${movie.title} in HD quality. ${movie.genres?.map(g => g.name).join(', ')} movie from ${movie.release_date?.split('-')[0] || 'N/A'}. Free streaming available.`;
+
   return {
-    title: `${movie.title} (${movie.release_date?.split('-')[0] || 'N/A'}) - Watch Online Free | CineVerse`,
-    description: movie.overview || `Watch ${movie.title} online for free. Download ${movie.title} in HD quality. ${movie.genres?.map(g => g.name).join(', ')} movie from ${movie.release_date?.split('-')[0] || 'N/A'}.`,
+    title: `${movie.title} (${movie.release_date?.split('-')[0] || 'N/A'}) - Watch Online Free | Movies`,
+    description: description,
     keywords,
     image: posterUrl,
     url: movieUrl,
@@ -63,7 +72,7 @@ export function generateMovieMetadata(seoConfig: SEOConfig): Metadata {
       title: seoConfig.title,
       description: seoConfig.description,
       url: seoConfig.url,
-      siteName: 'CineVerse',
+      siteName: 'Movies',
       images: seoConfig.image ? [
         {
           url: seoConfig.image,
@@ -99,13 +108,18 @@ export function generateMovieMetadata(seoConfig: SEOConfig): Metadata {
     alternates: {
       canonical: seoConfig.url,
     },
+    // Ensure no external canonical URLs
+    other: {
+      'og:url': seoConfig.url,
+      'twitter:url': seoConfig.url,
+    },
   };
 }
 
 export function generateHomePageSEO(): SEOConfig {
   return {
-    title: 'CineVerse - Watch Movies Online Free | HD Movie Streaming',
-    description: 'Watch thousands of movies online for free at CineVerse. Download HD movies, stream latest releases, and discover your favorite films. No registration required.',
+    title: 'Movies - Watch Movies Online Free | HD Movie Streaming',
+    description: 'Watch thousands of movies online for free. Download HD movies, stream latest releases, and discover your favorite films. No registration required.',
     keywords: [
       'watch movies online free',
       'download movies HD',
@@ -118,15 +132,15 @@ export function generateHomePageSEO(): SEOConfig {
       'streaming movies',
       'free movie site'
     ],
-    url: 'https://cineverse.com',
+    url: 'https://movies.n123movie.me',
     type: 'website'
   };
 }
 
 export function generateSearchPageSEO(query: string): SEOConfig {
   return {
-    title: `Search Results for "${query}" - CineVerse`,
-    description: `Find movies related to "${query}" on CineVerse. Watch and download your favorite movies online for free.`,
+    title: `Search Results for "${query}" - Movies`,
+    description: `Find movies related to "${query}". Watch and download your favorite movies online for free.`,
     keywords: [
       `search ${query}`,
       `${query} movies`,
@@ -135,7 +149,7 @@ export function generateSearchPageSEO(query: string): SEOConfig {
       'movie search',
       'find movies'
     ],
-    url: `https://cineverse.com/search?q=${encodeURIComponent(query)}`,
+    url: `https://movies.n123movie.me/search?q=${encodeURIComponent(query)}`,
     type: 'website'
   };
 }

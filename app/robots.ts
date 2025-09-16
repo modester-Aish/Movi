@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = 'https://cineverse.com';
+  const baseUrl = 'https://movies.n123movie.me';
   
   return {
     rules: [
