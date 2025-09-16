@@ -1,72 +1,116 @@
-"use client";
-
-import { useState, useEffect } from "react";
-import { use } from "react";
-import { getMovieByImdbId, getSimilarMovies, getYear } from "../../api/tmdb";
-import type { Movie, MovieListItem } from "../../api/tmdb";
+import { getMovieByImdbId, getSimilarMovies, getYear } from "../api/tmdb";
+import type { Movie, MovieListItem } from "../api/tmdb";
 import Link from "next/link";
 import Image from "next/image";
+import { generateMovieSEO, generateMovieMetadata } from "../lib/seo";
+import { generateMovieUrl, extractImdbIdFromSlug, isValidMovieSlug } from "../lib/slug";
+import MediaPlayer from "../components/MediaPlayer";
+import { Metadata } from 'next';
+import { redirect } from 'next/navigation';
 
 interface MoviePageProps {
   params: Promise<{
-    imdbId: string;
+    slug: string;
   }>;
 }
 
-export default function MoviePage({ params }: MoviePageProps) {
-  const { imdbId } = use(params);
-  const [movie, setMovie] = useState<Movie | null>(null);
-  const [similarMovies, setSimilarMovies] = useState<MovieListItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [activePlayer, setActivePlayer] = useState(1);
-
-  useEffect(() => {
-    const loadMovieData = async () => {
-      if (!imdbId) {
-        setError("Movie ID not found");
-        setLoading(false);
-        return;
-      }
-
-      try {
-        setLoading(true);
-        console.log('Loading movie for IMDB ID:', imdbId);
-        const movieData = await getMovieByImdbId(imdbId);
-        console.log('Movie data received:', movieData);
-        
-        if (movieData) {
-          console.log('Movie poster path:', movieData.poster_path);
-          console.log('Movie backdrop path:', movieData.backdrop_path);
-        }
-        
-        const similarData = movieData ? await getSimilarMovies(movieData.id) : [];
-
-        setMovie(movieData);
-        setSimilarMovies(similarData);
-
-      } catch (error) {
-        console.error('Error loading movie:', error);
-        setError('Failed to load movie data');
-      } finally {
-        setLoading(false);
-      }
+export async function generateMetadata({ params }: MoviePageProps): Promise<Metadata> {
+  const { slug } = await params;
+  
+  let imdbId: string | null = null;
+  
+  // Check if it's a new slug format (e.g., "the-godfather-tt0068646")
+  if (isValidMovieSlug(slug)) {
+    imdbId = extractImdbIdFromSlug(slug);
+  } 
+  // Check if it's an old IMDB ID format (e.g., "tt0068646")
+  else if (slug.match(/^tt\d{7,8}$/)) {
+    imdbId = slug;
+  }
+  
+  if (!imdbId) {
+    return {
+      title: 'Movie Not Found - CineVerse',
+      description: 'The requested movie could not be found.',
     };
+  }
+  
+  try {
+    const movie = await getMovieByImdbId(imdbId);
+    if (!movie) {
+      return {
+        title: 'Movie Not Found - CineVerse',
+        description: 'The requested movie could not be found.',
+      };
+    }
 
-    loadMovieData();
-  }, [imdbId]);
+    const seoConfig = generateMovieSEO(movie);
+    return generateMovieMetadata(seoConfig);
+  } catch (error) {
+    console.error('Error generating metadata:', error);
+    return {
+      title: 'Movie Not Found - CineVerse',
+      description: 'The requested movie could not be found.',
+    };
+  }
+}
 
-  if (loading) {
+export default async function MoviePage({ params }: MoviePageProps) {
+  const { slug } = await params;
+  
+  let imdbId: string | null = null;
+  let shouldRedirect = false;
+  
+  // Check if it's a new slug format (e.g., "the-godfather-tt0068646")
+  if (isValidMovieSlug(slug)) {
+    imdbId = extractImdbIdFromSlug(slug);
+  } 
+  // Check if it's an old IMDB ID format (e.g., "tt0068646")
+  else if (slug.match(/^tt\d{7,8}$/)) {
+    imdbId = slug;
+    shouldRedirect = true; // We'll redirect to the new format
+  }
+  
+  if (!imdbId) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex justify-center items-center min-h-[60vh]">
-            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-purple-500"></div>
-            <span className="ml-4 text-gray-400 text-lg">Loading movie...</span>
+          <div className="text-center py-16">
+            <div className="text-8xl mb-6">⚠️</div>
+            <h1 className="text-2xl font-bold text-white mb-4">Invalid Movie URL</h1>
+            <p className="text-gray-400 mb-6">The movie URL format is invalid.</p>
+            <Link 
+              href="/"
+              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200"
+            >
+              Back to Home
+            </Link>
           </div>
         </div>
       </div>
     );
+  }
+  
+  let movie: Movie | null = null;
+  let similarMovies: MovieListItem[] = [];
+  let error: string | null = null;
+
+  try {
+    movie = await getMovieByImdbId(imdbId);
+    if (movie) {
+      similarMovies = await getSimilarMovies(movie.id);
+      
+      // If this was an old URL format, redirect to the new format
+      if (shouldRedirect) {
+        const newUrl = generateMovieUrl(movie.title, movie.imdb_id);
+        redirect(newUrl);
+      }
+    } else {
+      error = "Movie not found";
+    }
+  } catch (err) {
+    console.error('Error loading movie:', err);
+    error = 'Failed to load movie data';
   }
 
   if (error || !movie) {
@@ -75,7 +119,7 @@ export default function MoviePage({ params }: MoviePageProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center py-16">
             <div className="text-8xl mb-6">⚠️</div>
-            <h2 className="text-2xl font-bold text-white mb-4">Movie Not Found</h2>
+            <h1 className="text-2xl font-bold text-white mb-4">Movie Not Found</h1>
             <p className="text-gray-400 mb-6">{error || 'This movie could not be loaded.'}</p>
             <Link 
               href="/"
@@ -89,16 +133,6 @@ export default function MoviePage({ params }: MoviePageProps) {
     );
   }
 
-  const getPlayerUrl = (playerNumber: number) => {
-    const baseUrl = `https://vidsrc.me/embed/movie?imdb=${imdbId}`;
-    const alternativeUrls = [
-      `https://vidsrc.to/embed/movie/${imdbId}`,
-      `https://vidsrc.xyz/embed/movie/${imdbId}`,
-      `https://vidsrc.pro/embed/movie/${imdbId}`
-    ];
-    return playerNumber === 1 ? baseUrl : alternativeUrls[playerNumber - 2] || baseUrl;
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -110,14 +144,10 @@ export default function MoviePage({ params }: MoviePageProps) {
               <div className="relative aspect-[2/3] rounded-lg overflow-hidden shadow-xl">
                 <Image
                   src={movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : '/placeholder.svg'}
-                  alt={movie.title}
+                  alt={`${movie.title} movie poster`}
                   fill
                   className="object-cover"
-                  onError={(e) => {
-                    console.log('Movie detail poster error:', movie.title, movie.poster_path);
-                    const target = e.target as HTMLImageElement;
-                    target.src = '/placeholder.svg';
-                  }}
+                  priority
                 />
               </div>
             </div>
@@ -170,50 +200,13 @@ export default function MoviePage({ params }: MoviePageProps) {
           </div>
         </div>
 
-        {/* Player Selection */}
-        <div className="mb-6">
-          <div className="flex flex-wrap gap-2">
-            {[1, 2, 3].map((playerNum) => (
-              <button
-                key={playerNum}
-                onClick={() => setActivePlayer(playerNum)}
-                className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-                  activePlayer === playerNum
-                    ? 'bg-purple-600 text-white'
-                    : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-                }`}
-              >
-                Player {playerNum}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Video Player */}
+        {/* Media Player */}
         <div className="mb-8">
-          <div className="bg-black rounded-lg overflow-hidden shadow-xl">
-            <div className="relative pt-[56.25%]">
-              <iframe 
-                className="absolute top-0 left-0 w-full h-full"
-                src={getPlayerUrl(activePlayer)}
-                title={`${movie.title} - Player ${activePlayer}`}
-                frameBorder="0"
-                referrerPolicy="origin"
-                allowFullScreen
-                allow="autoplay; fullscreen; picture-in-picture"
-                loading="lazy"
-              ></iframe>
-            </div>
-          </div>
-          
-          {/* Player Instructions */}
-          <div className="mt-4 p-4 bg-yellow-900/20 border border-yellow-500/30 rounded-lg">
-            <p className="text-yellow-400 text-sm">
-              <strong>Note:</strong> To play Movie Click on Play icon on Player 2-3 times until Movie Starts. 
-              During this Few Useless windows opened just close them they are ADS. 
-              If the Movie keeps buffering, Just pause it for 5-10 minutes then continue playing!
-            </p>
-          </div>
+          <MediaPlayer 
+            movieTitle={movie.title}
+            imdbId={imdbId}
+            className="mb-6"
+          />
         </div>
 
         {/* Download Links Section */}
@@ -266,23 +259,21 @@ export default function MoviePage({ params }: MoviePageProps) {
           <div className="mb-12">
             <h2 className="text-2xl font-bold text-white mb-6">Similar Movies</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-              {similarMovies.slice(0, 12).map((similarMovie) => (
+              {similarMovies
+                .filter((similarMovie) => similarMovie.imdb_id && similarMovie.imdb_id.trim() !== '')
+                .slice(0, 12)
+                .map((similarMovie, index) => (
                 <Link
-                  key={similarMovie.imdb_id}
-                  href={`/movie/${similarMovie.imdb_id}`}
+                  key={`${similarMovie.imdb_id}-${index}`}
+                  href={generateMovieUrl(similarMovie.title, similarMovie.imdb_id || '')}
                   className="group block transition-all duration-300 hover:transform hover:scale-105"
                 >
                   <div className="relative aspect-[2/3] rounded-lg overflow-hidden shadow-lg group-hover:shadow-2xl transition-all duration-300">
                     <Image
                       src={similarMovie.poster_path ? `https://image.tmdb.org/t/p/w500${similarMovie.poster_path}` : '/placeholder.svg'}
-                      alt={similarMovie.title}
+                      alt={`${similarMovie.title} movie poster`}
                       fill
                       className="object-cover transition-transform duration-300 group-hover:scale-110"
-                      onError={(e) => {
-                        console.log('Similar movie poster error:', similarMovie.title, similarMovie.poster_path);
-                        const target = e.target as HTMLImageElement;
-                        target.src = '/placeholder.svg';
-                      }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     <div className="absolute bottom-0 left-0 right-0 p-3 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">

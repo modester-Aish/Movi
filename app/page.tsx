@@ -7,6 +7,7 @@ import { getMoviesByImdbIds, getYear } from "./api/tmdb";
 import { getTotalMovieCount, getRandomMovieIds } from "./utils/movieIds";
 import { MOVIE_CATEGORIES, getAllCategoryKeys, type CategoryKey } from "./data/movieCategories";
 import type { Movie } from "./api/tmdb";
+import { generateMovieUrl } from "./lib/slug";
 
 export default function Home() {
   const [activeCategory, setActiveCategory] = useState<CategoryKey>('FEATURED');
@@ -117,9 +118,11 @@ export default function Home() {
         {/* Background Movie Slider */}
         {heroMovies.length > 0 ? (
           <div className="absolute inset-0">
-            {heroMovies.map((movie, index) => (
+            {heroMovies
+              .filter((movie) => movie.imdb_id && movie.imdb_id.trim() !== '')
+              .map((movie, index) => (
               <div
-                key={movie.imdb_id}
+                key={`${movie.imdb_id}-${index}`}
                 className={`absolute inset-0 transition-opacity duration-1000 ${
                   index === currentHeroIndex ? 'opacity-100' : 'opacity-0'
                 }`}
@@ -243,10 +246,12 @@ export default function Home() {
         {!loading && (
           <>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
-              {movies.map((movie) => (
+              {movies
+                .filter((movie) => movie.imdb_id && movie.imdb_id.trim() !== '')
+                .map((movie, index) => (
                 <Link 
-                  href={`/movie/${movie.imdb_id}`} 
-                  key={movie.imdb_id}
+                  href={generateMovieUrl(movie.title, movie.imdb_id || '')} 
+                  key={`${movie.imdb_id}-${index}`}
                   className="group block transition-all duration-300 hover:transform hover:scale-105"
                 >
                   <div className="relative aspect-[2/3] rounded-lg overflow-hidden shadow-lg group-hover:shadow-2xl transition-all duration-300">

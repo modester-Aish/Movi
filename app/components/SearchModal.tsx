@@ -6,6 +6,7 @@ import Image from "next/image";
 import { searchMoviesByTitle } from "../data/bulkMovieIds";
 import { getMoviesByImdbIds, getYear } from "../api/tmdb";
 import type { Movie } from "../api/tmdb";
+import { generateMovieUrl } from "../lib/slug";
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -69,7 +70,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
   };
 
   const handleSuggestionClick = (movie: Movie) => {
-    router.push(`/movie/${movie.imdb_id}`);
+    router.push(generateMovieUrl(movie.title, movie.imdb_id || ''));
     onClose();
   };
 

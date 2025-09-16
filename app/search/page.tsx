@@ -7,6 +7,7 @@ import Link from "next/link";
 import { getMoviesByImdbIds, getYear } from "../api/tmdb";
 import { searchMoviesByTitle, getRandomMovieIds } from "../data/bulkMovieIds";
 import type { Movie } from "../api/tmdb";
+import { generateMovieUrl } from "../lib/slug";
 
 function SearchResultsContent() {
   const searchParams = useSearchParams();
@@ -137,7 +138,7 @@ function SearchResultsContent() {
             {results.map((movie, index) => (
               <Link
                 key={`${movie.imdb_id}-${index}`}
-                href={`/movie/${movie.imdb_id}`}
+                href={generateMovieUrl(movie.title, movie.imdb_id || '')}
                 className="group relative bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
               >
                 {/* Movie Poster */}
