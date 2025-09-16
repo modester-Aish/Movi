@@ -110,8 +110,8 @@ export function generateMovieMetadata(seoConfig: SEOConfig): Metadata {
     },
     // Ensure no external canonical URLs
     other: {
-      'og:url': seoConfig.url,
-      'twitter:url': seoConfig.url,
+      'og:url': seoConfig.url || 'https://movies.n123movie.me',
+      'twitter:url': seoConfig.url || 'https://movies.n123movie.me',
     },
   };
 }

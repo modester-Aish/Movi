@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 
 export default function TestAPI() {
   const [apiTest, setApiTest] = useState<{
@@ -75,9 +76,11 @@ export default function TestAPI() {
           {apiTest?.posterUrl && (
             <div className="bg-gray-800 p-6 rounded-lg">
               <h3 className="text-white text-lg mb-4">Test Poster Image:</h3>
-              <img 
+              <Image 
                 src={apiTest.posterUrl} 
                 alt="Test Poster" 
+                width={192}
+                height={288}
                 className="w-48 h-72 object-cover border border-white"
                 onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
                   console.log('Direct image load error:', e);
