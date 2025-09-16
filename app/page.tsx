@@ -151,7 +151,7 @@ export default function Home() {
         {/* Hero Content */}
         <div className="relative z-20 text-center text-white px-4 max-w-4xl mx-auto">
           <h1 className="text-5xl md:text-7xl font-bold mb-4 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-            CineVerse
+            movies123
           </h1>
           <p className="text-xl md:text-2xl mb-8 text-gray-200 max-w-2xl mx-auto">
             Discover our massive collection of {totalMovies.toLocaleString()} movies. Watch, download, and explore.
@@ -311,12 +311,12 @@ export default function Home() {
       <footer className="bg-black/50 border-t border-gray-800 py-12 mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h3 className="text-2xl font-bold text-white mb-4">CineVerse</h3>
+            <h3 className="text-2xl font-bold text-white mb-4">movies123</h3>
             <p className="text-gray-400 mb-6">
               Movie data provided by TMDB. Watch thousands of movies online.
             </p>
             <div className="flex justify-center space-x-6 text-sm text-gray-500">
-              <span>© 2024 CineVerse</span>
+              <span>© 2024 movies123</span>
               <span>•</span>
               <span>Privacy Policy</span>
               <span>•</span>

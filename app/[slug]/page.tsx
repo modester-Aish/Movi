@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: MoviePageProps): Promise<Meta
   
   if (!imdbId) {
     return {
-      title: 'Movie Not Found - CineVerse',
+      title: 'Movie Not Found - movies123',
       description: 'The requested movie could not be found.',
     };
   }
@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: MoviePageProps): Promise<Meta
     const movie = await getMovieByImdbId(imdbId);
     if (!movie) {
       return {
-        title: 'Movie Not Found - CineVerse',
+        title: 'Movie Not Found - movies123',
         description: 'The requested movie could not be found.',
       };
     }
@@ -48,7 +48,7 @@ export async function generateMetadata({ params }: MoviePageProps): Promise<Meta
   } catch (error) {
     console.error('Error generating metadata:', error);
     return {
-      title: 'Movie Not Found - CineVerse',
+      title: 'Movie Not Found - movies123',
       description: 'The requested movie could not be found.',
     };
   }
@@ -328,7 +328,7 @@ export default async function MoviePage({ params }: MoviePageProps) {
         {/* Footer Info */}
         <div className="text-center py-8 border-t border-gray-700">
           <p className="text-gray-400 text-sm">
-            © 2024 CineVerse - Watch Online Movies. All rights reserved.
+            © 2024 movies123 - Watch Online Movies. All rights reserved.
           </p>
           <p className="text-gray-500 text-xs mt-2">
             Disclaimer: All content is provided by third-party sources. We do not host any content.

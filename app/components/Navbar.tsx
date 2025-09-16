@@ -11,33 +11,16 @@ export default function Navbar() {
   return (
     <nav className="bg-black/50 backdrop-blur-sm border-b border-gray-700 sticky top-0 z-30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex items-center">
+        <div className="flex items-center justify-center h-16 relative">
+          {/* Logo - Left */}
+          <div className="absolute left-0">
             <Link href="/" className="text-2xl font-bold text-white hover:text-purple-400 transition-colors">
-              CineVerse
+              movies123
             </Link>
           </div>
           
-          {/* Desktop Navigation */}
-          <div className="hidden md:block">
-            <div className="ml-10 flex items-baseline space-x-4">
-              <Link href="/" className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">
-                Movies
-              </Link>
-              <Link href="#" className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">
-                Genres
-              </Link>
-              <Link href="#" className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">
-                Collections
-              </Link>
-              <Link href="/admin" className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">
-                Admin
-              </Link>
-            </div>
-          </div>
-
-          {/* Search Bar */}
-          <div className="hidden md:block flex-1 max-w-md mx-8">
+          {/* Search Bar - Center */}
+          <div className="hidden md:block max-w-md">
             <div className="relative">
               <button
                 onClick={() => setIsSearchOpen(true)}
@@ -55,8 +38,8 @@ export default function Navbar() {
 
 
 
-          {/* Mobile menu button */}
-          <div className="md:hidden">
+          {/* Mobile menu button - Right */}
+          <div className="md:hidden absolute right-0">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="text-gray-300 hover:text-white focus:outline-none focus:text-white"
@@ -77,18 +60,6 @@ export default function Navbar() {
       {isMenuOpen && (
         <div className="md:hidden bg-gray-900 border-t border-gray-700">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            <Link href="/" className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium">
-              Movies
-            </Link>
-            <Link href="#" className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium">
-              Genres
-            </Link>
-            <Link href="#" className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium">
-              Collections
-            </Link>
-            <Link href="/admin" className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium">
-              Admin
-            </Link>
             <div className="pt-4 pb-3 border-t border-gray-700">
               <div className="px-3 py-2">
                 <button
@@ -98,7 +69,6 @@ export default function Navbar() {
                   Search...
                 </button>
               </div>
-
             </div>
           </div>
         </div>
