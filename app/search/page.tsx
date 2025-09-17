@@ -4,8 +4,8 @@ import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { getMoviesByImdbIds, getYear } from "../api/tmdb";
-import { searchMoviesByTitle, getRandomMovieIds } from "../data/bulkMovieIds";
+import { getMoviesByImdbIds, getYear, searchMoviesByTitle } from "../api/tmdb";
+import { getRandomMovieIds } from "../data/bulkMovieIds";
 import type { Movie } from "../api/tmdb";
 import { generateMovieUrl } from "../lib/slug";
 
@@ -28,29 +28,24 @@ function SearchResultsContent() {
       setError(null);
 
       try {
-        // Get movie IDs for search - increase limit for better results
-        const movieIds = searchMoviesByTitle(query, 100);
+        // Use TMDB search API for better results
+        const searchResults = await searchMoviesByTitle(query, 50);
         
-        // Add some random movies to increase variety
-        const randomIds = getRandomMovieIds(50);
-        const allIds = [...movieIds, ...randomIds];
-        
-        const moviesData = await getMoviesByImdbIds(allIds);
-        
-        // Filter by search term (client-side filtering)
-        const filtered = moviesData.filter(movie =>
-          movie.title.toLowerCase().includes(query.toLowerCase()) ||
-          movie.overview?.toLowerCase().includes(query.toLowerCase()) ||
-          movie.release_date?.includes(query)
-        );
-        
-        // Remove duplicates based on imdb_id
-        const uniqueMovies = filtered.filter((movie, index, self) => 
-          index === self.findIndex(m => m.imdb_id === movie.imdb_id)
-        );
+        // Convert to Movie type for consistency
+        const moviesData = searchResults.map(movie => ({
+          ...movie,
+          overview: '', // Will be filled if needed
+          genres: [], // Will be filled if needed
+          vote_count: 0,
+          popularity: 0,
+          adult: false,
+          original_language: 'en',
+          original_title: movie.title,
+          backdrop_path: movie.backdrop_path,
+        }));
         
         // Sort by relevance (exact matches first, then partial matches)
-        const sorted = uniqueMovies.sort((a, b) => {
+        const sorted = moviesData.sort((a, b) => {
           const aExact = a.title.toLowerCase() === query.toLowerCase();
           const bExact = b.title.toLowerCase() === query.toLowerCase();
           

@@ -266,3 +266,53 @@ export async function getMovieVideos(movieId: number): Promise<Video[]> {
     return [];
   }
 }
+
+// Search movies by title using TMDB API
+export async function searchMoviesByTitle(searchTerm: string, limit: number = 20): Promise<MovieListItem[]> {
+  try {
+    console.log('TMDB searchMoviesByTitle called with:', searchTerm, limit);
+    const url = `${TMDB_BASE_URL}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(searchTerm)}&page=1`;
+    const response = await fetch(url);
+    const data = await response.json();
+    
+    console.log('TMDB search response:', data);
+    
+    // Check if we have results
+    if (!data.results || !Array.isArray(data.results)) {
+      console.log('No results or invalid results array from TMDB');
+      return [];
+    }
+    
+    // For each movie, get its IMDB ID
+    const moviesWithImdbIds = await Promise.all(
+      data.results.slice(0, limit).map(async (movie: Record<string, unknown>) => {
+        try {
+          const detailsUrl = `${TMDB_BASE_URL}/movie/${movie.id}?api_key=${TMDB_API_KEY}`;
+          const detailsResponse = await fetch(detailsUrl);
+          const movieDetails = await detailsResponse.json();
+          
+          return {
+            ...movie,
+            imdb_id: movieDetails.imdb_id,
+            runtime: movieDetails.runtime,
+          };
+        } catch (error) {
+          console.error('Error fetching movie details:', error);
+          return {
+            ...movie,
+            imdb_id: null,
+            runtime: null,
+          };
+        }
+      })
+    );
+    
+    // Filter out movies without IMDB IDs
+    const validMovies = moviesWithImdbIds.filter(movie => movie.imdb_id) as MovieListItem[];
+    console.log('TMDB searchMoviesByTitle returning:', validMovies.length, 'movies');
+    return validMovies;
+  } catch (error) {
+    console.error('Error searching movies:', error);
+    return [];
+  }
+}

@@ -8,6 +8,7 @@ export async function GET(request: NextRequest) {
     
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
+    const country = searchParams.get('country');
     const limit = parseInt(searchParams.get('limit') || '20');
     const page = parseInt(searchParams.get('page') || '1');
     const random = searchParams.get('random') === 'true';
@@ -17,6 +18,10 @@ export async function GET(request: NextRequest) {
     
     if (category) {
       query.category = category;
+    }
+    
+    if (country) {
+      query.country = country;
     }
 
     let movies;

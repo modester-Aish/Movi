@@ -153,3 +153,33 @@ export function generateSearchPageSEO(query: string): SEOConfig {
     type: 'website'
   };
 }
+
+export function generateGenrePageSEO(genreName: string, baseUrl: string = 'https://movies.n123movie.me'): SEOConfig {
+  return {
+    title: `${genreName} Movies | Watch ${genreName} Movies Online Free | movies123`,
+    description: `Watch the best ${genreName.toLowerCase()} movies online for free. Discover top-rated ${genreName.toLowerCase()} films, latest releases, and classic favorites.`,
+    keywords: [`${genreName.toLowerCase()} movies`, 'watch movies online', 'free movies', 'movie streaming', `${genreName.toLowerCase()} films`],
+    url: baseUrl,
+    type: 'website',
+  };
+}
+
+export function generateCountryPageSEO(countryName: string, baseUrl: string = 'https://movies.n123movie.me'): SEOConfig {
+  return {
+    title: `${countryName} Movies | Watch ${countryName} Movies Online Free | movies123`,
+    description: `Watch the best ${countryName} movies online for free. Discover top-rated films from ${countryName}, latest releases, and classic favorites.`,
+    keywords: [`${countryName} movies`, 'watch movies online', 'free movies', 'movie streaming', `${countryName} films`],
+    url: baseUrl,
+    type: 'website',
+  };
+}
+
+export function generateMoviesPageSEO(baseUrl: string = 'https://movies.n123movie.me'): SEOConfig {
+  return {
+    title: 'All Movies | Watch Movies Online Free | movies123',
+    description: 'Browse thousands of movies online for free. Watch latest releases, classic films, and discover your favorite movies. No registration required.',
+    keywords: ['all movies', 'watch movies online', 'free movies', 'movie streaming', 'browse movies', 'movie collection'],
+    url: baseUrl,
+    type: 'website',
+  };
+}

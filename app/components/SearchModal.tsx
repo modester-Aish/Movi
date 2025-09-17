@@ -3,8 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { searchMoviesByTitle } from "../data/bulkMovieIds";
-import { getMoviesByImdbIds, getYear } from "../api/tmdb";
+import { getYear, searchMoviesByTitle } from "../api/tmdb";
 import type { Movie } from "../api/tmdb";
 import { generateMovieUrl } from "../lib/slug";
 
@@ -35,21 +34,33 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
 
       setLoading(true);
       try {
-        // Get movie IDs for search
-        const movieIds = searchMoviesByTitle(searchTerm, 30);
-        const moviesData = await getMoviesByImdbIds(movieIds);
+        console.log('SearchModal: Starting search for:', searchTerm);
+        // Use TMDB search API for better results
+        const searchResults = await searchMoviesByTitle(searchTerm, 20);
+        console.log('SearchModal: Search results type:', typeof searchResults, 'Array:', Array.isArray(searchResults));
+        console.log('SearchModal: Search results:', searchResults);
         
-        // Filter by search term (client-side filtering)
-        const filtered = moviesData.filter(movie =>
-          movie.title.toLowerCase().includes(searchTerm.toLowerCase())
-        );
+        // Make sure searchResults is an array
+        if (!Array.isArray(searchResults)) {
+          console.error('SearchModal: searchResults is not an array:', searchResults);
+          setSuggestions([]);
+          return;
+        }
         
-        // Remove duplicates
-        const uniqueMovies = filtered.filter((movie, index, self) => 
-          index === self.findIndex(m => m.imdb_id === movie.imdb_id)
-        );
+        // Convert to Movie type for consistency
+        const moviesData = searchResults.map(movie => ({
+          ...movie,
+          overview: '', // Will be filled if needed
+          genres: [], // Will be filled if needed
+          vote_count: 0,
+          popularity: 0,
+          adult: false,
+          original_language: 'en',
+          original_title: movie.title,
+          backdrop_path: movie.backdrop_path,
+        }));
         
-        setSuggestions(uniqueMovies.slice(0, 8)); // Show max 8 suggestions
+        setSuggestions(moviesData.slice(0, 8)); // Show max 8 suggestions
       } catch (error) {
         console.error('Error fetching suggestions:', error);
         setSuggestions([]);
