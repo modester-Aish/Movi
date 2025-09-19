@@ -8,7 +8,7 @@ interface CountryLayoutProps {
 export async function generateMetadata() {
   const countryName = "United States";
   
-  const seoConfig = generateCountryPageSEO(countryName, `https://ww1.n123movie.me/united-states`);
+  const seoConfig = generateCountryPageSEO(countryName, `${getBaseUrl()}/united-states`);
   return generateMovieMetadata(seoConfig);
 }
 

@@ -17,8 +17,8 @@ export interface SEOConfig {
 }
 
 export function generateMovieSEO(movie: Movie, baseUrl?: string): SEOConfig {
-  // Use fixed domain for canonical URL
-  const currentBaseUrl = baseUrl || 'https://ww1.n123movie.me';
+  // Use dynamic domain for canonical URL
+  const currentBaseUrl = baseUrl || getBaseUrl();
   const movieUrl = `${currentBaseUrl}/${movie.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')}-${movie.imdb_id}`;
   const posterUrl = movie.poster_path 
     ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
@@ -108,12 +108,12 @@ export function generateMovieMetadata(seoConfig: SEOConfig): Metadata {
       },
     },
     alternates: {
-      canonical: seoConfig.url,
+      canonical: seoConfig.url || 'https://ww1.n123movie.me',
     },
     // Ensure no external canonical URLs
     other: {
-      'og:url': seoConfig.url || 'https://ww1.n123movie.me',
-      'twitter:url': seoConfig.url || 'https://ww1.n123movie.me',
+      'og:url': seoConfig.url || getBaseUrl(),
+      'twitter:url': seoConfig.url || getBaseUrl(),
     },
   };
 }
@@ -134,7 +134,7 @@ export function generateHomePageSEO(): SEOConfig {
       'streaming movies',
       'free movie site'
     ],
-    url: 'https://ww1.n123movie.me',
+    url: getBaseUrl(),
     type: 'website'
   };
 }
@@ -151,7 +151,7 @@ export function generateSearchPageSEO(query: string): SEOConfig {
       'movie search',
       'find movies'
     ],
-    url: `https://ww1.n123movie.me/search?q=${encodeURIComponent(query)}`,
+    url: `${getBaseUrl()}/search?q=${encodeURIComponent(query)}`,
     type: 'website'
   };
 }

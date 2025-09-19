@@ -1,4 +1,5 @@
 import { generateGenrePageSEO, generateMovieMetadata } from "../../lib/seo";
+import { getBaseUrl } from "../../lib/domain";
 
 interface GenreLayoutProps {
   children: React.ReactNode;
@@ -13,7 +14,7 @@ export async function generateMetadata({ params }: GenreLayoutProps) {
     word.charAt(0).toUpperCase() + word.slice(1)
   ).join(' ');
   
-  const seoConfig = generateGenrePageSEO(genreName, `https://ww1.n123movie.me/genre/${slug}`);
+  const seoConfig = generateGenrePageSEO(genreName, `${getBaseUrl()}/${slug}`);
   return generateMovieMetadata(seoConfig);
 }
 
