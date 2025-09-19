@@ -3,10 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { getMoviesByImdbIds } from "./api/tmdb";
-import { BULK_MOVIE_IDS } from "./data/bulkMovieIds";
-import type { Movie } from "./api/tmdb";
-import { generateMovieUrl } from "./lib/slug";
+import { getMoviesByImdbIds } from "@/api/tmdb";
+import { BULK_MOVIE_IDS } from "@/data/bulkMovieIds";
+import type { Movie } from "@/api/tmdb";
+import { generateMovieUrl } from "@/lib/slug";
 
 export default function Home() {
   const [categories, setCategories] = useState<{[key: string]: Movie[]}>({});

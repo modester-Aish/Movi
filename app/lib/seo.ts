@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import type { Movie } from '../api/tmdb';
+import { getBaseUrl } from './domain';
 
 export interface SEOConfig {
   title: string;
@@ -15,12 +16,13 @@ export interface SEOConfig {
   tags?: string[];
 }
 
-export function generateMovieSEO(movie: Movie, baseUrl: string = 'https://movies.n123movie.me'): SEOConfig {
-  // Use your own domain for canonical URL
-  const movieUrl = `${baseUrl}/${movie.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')}-${movie.imdb_id}`;
+export function generateMovieSEO(movie: Movie, baseUrl?: string): SEOConfig {
+  // Use dynamic domain for canonical URL
+  const currentBaseUrl = baseUrl || getBaseUrl();
+  const movieUrl = `${currentBaseUrl}/${movie.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')}-${movie.imdb_id}`;
   const posterUrl = movie.poster_path 
     ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-    : `${baseUrl}/placeholder.svg`;
+    : `${currentBaseUrl}/placeholder.svg`;
 
   // Generate comprehensive SEO keywords
   const keywords = [
@@ -110,8 +112,8 @@ export function generateMovieMetadata(seoConfig: SEOConfig): Metadata {
     },
     // Ensure no external canonical URLs
     other: {
-      'og:url': seoConfig.url || 'https://movies.n123movie.me',
-      'twitter:url': seoConfig.url || 'https://movies.n123movie.me',
+      'og:url': seoConfig.url || getBaseUrl(),
+      'twitter:url': seoConfig.url || getBaseUrl(),
     },
   };
 }
@@ -132,7 +134,7 @@ export function generateHomePageSEO(): SEOConfig {
       'streaming movies',
       'free movie site'
     ],
-    url: 'https://movies.n123movie.me',
+    url: getBaseUrl(),
     type: 'website'
   };
 }
@@ -149,37 +151,37 @@ export function generateSearchPageSEO(query: string): SEOConfig {
       'movie search',
       'find movies'
     ],
-    url: `https://movies.n123movie.me/search?q=${encodeURIComponent(query)}`,
+    url: `${getBaseUrl()}/search?q=${encodeURIComponent(query)}`,
     type: 'website'
   };
 }
 
-export function generateGenrePageSEO(genreName: string, baseUrl: string = 'https://movies.n123movie.me'): SEOConfig {
+export function generateGenrePageSEO(genreName: string, baseUrl?: string): SEOConfig {
   return {
     title: `${genreName} Movies | Watch ${genreName} Movies Online Free | movies123`,
     description: `Watch the best ${genreName.toLowerCase()} movies online for free. Discover top-rated ${genreName.toLowerCase()} films, latest releases, and classic favorites.`,
     keywords: [`${genreName.toLowerCase()} movies`, 'watch movies online', 'free movies', 'movie streaming', `${genreName.toLowerCase()} films`],
-    url: baseUrl,
+    url: baseUrl || getBaseUrl(),
     type: 'website',
   };
 }
 
-export function generateCountryPageSEO(countryName: string, baseUrl: string = 'https://movies.n123movie.me'): SEOConfig {
+export function generateCountryPageSEO(countryName: string, baseUrl?: string): SEOConfig {
   return {
     title: `${countryName} Movies | Watch ${countryName} Movies Online Free | movies123`,
     description: `Watch the best ${countryName} movies online for free. Discover top-rated films from ${countryName}, latest releases, and classic favorites.`,
     keywords: [`${countryName} movies`, 'watch movies online', 'free movies', 'movie streaming', `${countryName} films`],
-    url: baseUrl,
+    url: baseUrl || getBaseUrl(),
     type: 'website',
   };
 }
 
-export function generateMoviesPageSEO(baseUrl: string = 'https://movies.n123movie.me'): SEOConfig {
+export function generateMoviesPageSEO(baseUrl?: string): SEOConfig {
   return {
     title: 'All Movies | Watch Movies Online Free | movies123',
     description: 'Browse thousands of movies online for free. Watch latest releases, classic films, and discover your favorite movies. No registration required.',
     keywords: ['all movies', 'watch movies online', 'free movies', 'movie streaming', 'browse movies', 'movie collection'],
-    url: baseUrl,
+    url: baseUrl || getBaseUrl(),
     type: 'website',
   };
 }

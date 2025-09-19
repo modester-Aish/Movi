@@ -1,9 +1,9 @@
-import { getMovieByImdbId, getSimilarMovies, getYear } from "../api/tmdb";
-import type { Movie, MovieListItem } from "../api/tmdb";
+import { getMovieByImdbId, getSimilarMovies, getYear } from "@/api/tmdb";
+import type { Movie, MovieListItem } from "@/api/tmdb";
 import Link from "next/link";
 import Image from "next/image";
-import { generateMovieSEO, generateMovieMetadata } from "../lib/seo";
-import { generateMovieUrl, extractImdbIdFromSlug, isValidMovieSlug } from "../lib/slug";
+import { generateMovieSEO, generateMovieMetadata } from "@/lib/seo";
+import { generateMovieUrl, extractImdbIdFromSlug, isValidMovieSlug } from "@/lib/slug";
 import { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
@@ -43,7 +43,7 @@ export async function generateMetadata({ params }: MoviePageProps): Promise<Meta
       };
     }
 
-    const seoConfig = generateMovieSEO(movie, 'https://movies.n123movie.me');
+    const seoConfig = generateMovieSEO(movie);
     return generateMovieMetadata(seoConfig);
   } catch (error) {
     console.error('Error generating metadata:', error);
@@ -293,7 +293,7 @@ export default async function MoviePage({ params }: MoviePageProps) {
                       className="object-cover group-hover:scale-105 transition-transform duration-200"
                     />
                     <div className="absolute bottom-1 right-1 bg-black bg-opacity-80 text-white text-xs px-1 py-0.5 rounded">
-                      {similarMovie.runtime ? `${similarMovie.runtime}m` : `${Math.floor(Math.random() * 60) + 90}m`}
+                      {Math.floor(Math.random() * 60) + 90}m
                     </div>
                   </div>
                   <div className="flex-1 min-w-0">

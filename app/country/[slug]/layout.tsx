@@ -1,4 +1,4 @@
-import { generateCountryPageSEO } from "../../lib/seo";
+import { generateCountryPageSEO, generateMovieMetadata } from "../../lib/seo";
 
 interface CountryLayoutProps {
   children: React.ReactNode;
@@ -13,7 +13,8 @@ export async function generateMetadata({ params }: CountryLayoutProps) {
     word.charAt(0).toUpperCase() + word.slice(1)
   ).join(' ');
   
-  return generateCountryPageSEO(countryName, `https://movies.n123movie.me/country/${slug}`);
+  const seoConfig = generateCountryPageSEO(countryName, `https://movies.n123movie.me/country/${slug}`);
+  return generateMovieMetadata(seoConfig);
 }
 
 export default function CountryLayout({ children }: CountryLayoutProps) {

@@ -4,10 +4,10 @@ import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { getMoviesByImdbIds, getYear, searchMoviesByTitle } from "../api/tmdb";
-import { getRandomMovieIds } from "../data/bulkMovieIds";
-import type { Movie } from "../api/tmdb";
-import { generateMovieUrl } from "../lib/slug";
+import { getMoviesByImdbIds, getYear, searchMoviesByTitle } from "@/api/tmdb";
+import { getRandomMovieIds } from "@/data/bulkMovieIds";
+import type { Movie } from "@/api/tmdb";
+import { generateMovieUrl } from "@/lib/slug";
 
 function SearchResultsContent() {
   const searchParams = useSearchParams();
@@ -32,17 +32,20 @@ function SearchResultsContent() {
         const searchResults = await searchMoviesByTitle(query, 50);
         
         // Convert to Movie type for consistency
-        const moviesData = searchResults.map(movie => ({
-          ...movie,
-          overview: '', // Will be filled if needed
-          genres: [], // Will be filled if needed
-          vote_count: 0,
-          popularity: 0,
-          adult: false,
-          original_language: 'en',
-          original_title: movie.title,
-          backdrop_path: movie.backdrop_path,
-        }));
+        const moviesData = searchResults
+          .filter(movie => movie.imdb_id && movie.imdb_id.trim() !== '') // Only include movies with valid imdb_id
+          .map(movie => ({
+            ...movie,
+            imdb_id: movie.imdb_id!, // We know it exists due to filter
+            overview: '', // Will be filled if needed
+            genres: [], // Will be filled if needed
+            vote_count: 0,
+            popularity: 0,
+            adult: false,
+            original_language: 'en',
+            original_title: movie.title,
+            backdrop_path: movie.backdrop_path || null,
+          }));
         
         // Sort by relevance (exact matches first, then partial matches)
         const sorted = moviesData.sort((a, b) => {

@@ -1,10 +1,11 @@
 import { MetadataRoute } from 'next';
-import { getRandomMovieIds } from './utils/movieIds';
-import { getMoviesByImdbIds } from './api/tmdb';
-import { generateMovieUrl } from './lib/slug';
+import { getRandomMovieIds } from '@/utils/movieIds';
+import { getMoviesByImdbIds } from '@/api/tmdb';
+import { generateMovieUrl } from "@/lib/slug";
+import { getBaseUrl } from "@/lib/domain";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://movies.n123movie.me';
+  const baseUrl = getBaseUrl();
   
   // Static pages
   const staticPages: MetadataRoute.Sitemap = [

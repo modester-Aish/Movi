@@ -3,9 +3,9 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { getYear, searchMoviesByTitle } from "../api/tmdb";
-import type { Movie } from "../api/tmdb";
-import { generateMovieUrl } from "../lib/slug";
+import { getYear, searchMoviesByTitle } from "@/api/tmdb";
+import type { Movie } from "@/api/tmdb";
+import { generateMovieUrl } from "@/lib/slug";
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -48,17 +48,20 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
         }
         
         // Convert to Movie type for consistency
-        const moviesData = searchResults.map(movie => ({
-          ...movie,
-          overview: '', // Will be filled if needed
-          genres: [], // Will be filled if needed
-          vote_count: 0,
-          popularity: 0,
-          adult: false,
-          original_language: 'en',
-          original_title: movie.title,
-          backdrop_path: movie.backdrop_path,
-        }));
+        const moviesData = searchResults
+          .filter(movie => movie.imdb_id && movie.imdb_id.trim() !== '') // Only include movies with valid imdb_id
+          .map(movie => ({
+            ...movie,
+            imdb_id: movie.imdb_id!, // We know it exists due to filter
+            overview: '', // Will be filled if needed
+            genres: [], // Will be filled if needed
+            vote_count: 0,
+            popularity: 0,
+            adult: false,
+            original_language: 'en',
+            original_title: movie.title,
+            backdrop_path: movie.backdrop_path || null,
+          }));
         
         setSuggestions(moviesData.slice(0, 8)); // Show max 8 suggestions
       } catch (error) {

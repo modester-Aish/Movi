@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "./components/Navbar";
+import { getBaseUrl } from "./lib/domain";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,7 +35,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://movies.n123movie.me',
+    url: getBaseUrl(),
     siteName: 'movies123',
     title: 'movies123 - Watch Movies Online Free | HD Movie Streaming',
     description: 'Watch thousands of movies online for free. Download HD movies, stream latest releases, and discover your favorite films. No registration required.',
@@ -45,7 +46,7 @@ export const metadata: Metadata = {
     description: 'Watch thousands of movies online for free. Download HD movies, stream latest releases, and discover your favorite films. No registration required.',
   },
   alternates: {
-    canonical: 'https://movies.n123movie.me',
+    canonical: getBaseUrl(),
   },
 };
 
