@@ -8,7 +8,7 @@ interface GenreLayoutProps {
 export async function generateMetadata() {
   const genreName = "Adventure";
   
-  const seoConfig = generateGenrePageSEO(genreName, `${getBaseUrl()}/adventure`);
+  const seoConfig = generateGenrePageSEO(genreName, `https://ww1.n123movie.me/adventure`);
   return generateMovieMetadata(seoConfig);
 }
 

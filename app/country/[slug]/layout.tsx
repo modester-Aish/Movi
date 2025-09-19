@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: CountryLayoutProps) {
     word.charAt(0).toUpperCase() + word.slice(1)
   ).join(' ');
   
-  const seoConfig = generateCountryPageSEO(countryName, `https://movies.n123movie.me/country/${slug}`);
+  const seoConfig = generateCountryPageSEO(countryName, `https://ww1.n123movie.me/country/${slug}`);
   return generateMovieMetadata(seoConfig);
 }
 

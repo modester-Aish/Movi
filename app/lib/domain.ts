@@ -16,7 +16,7 @@ export function getCurrentDomain(request?: Request): string {
   }
   
   // Fallback for build time or when neither is available
-  return 'https://movies.n123movie.me';
+  return 'https://ww1.n123movie.me';
 }
 
 /**
@@ -27,7 +27,7 @@ export function getBaseUrl(): string {
   // Check if we're in a server environment with headers
   if (typeof window === 'undefined') {
     // In server-side rendering, we'll use environment variables or fallback
-    return process.env.NEXT_PUBLIC_SITE_URL || 'https://movies.n123movie.me';
+    return process.env.NEXT_PUBLIC_SITE_URL || 'https://ww1.n123movie.me';
   }
   
   // In client-side, use the current domain
@@ -39,5 +39,5 @@ export function getBaseUrl(): string {
  * This ensures the build process works correctly
  */
 export function getBaseUrlForBuild(): string {
-  return process.env.NEXT_PUBLIC_SITE_URL || 'https://movies.n123movie.me';
+  return process.env.NEXT_PUBLIC_SITE_URL || 'https://ww1.n123movie.me';
 }

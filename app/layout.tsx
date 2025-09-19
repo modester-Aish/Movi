@@ -35,7 +35,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: getBaseUrl(),
+    url: 'https://ww1.n123movie.me',
     siteName: 'movies123',
     title: 'movies123 - Watch Movies Online Free | HD Movie Streaming',
     description: 'Watch thousands of movies online for free. Download HD movies, stream latest releases, and discover your favorite films. No registration required.',
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
     description: 'Watch thousands of movies online for free. Download HD movies, stream latest releases, and discover your favorite films. No registration required.',
   },
   alternates: {
-    canonical: getBaseUrl(),
+    canonical: 'https://ww1.n123movie.me',
   },
 };
 

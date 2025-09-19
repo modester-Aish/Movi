@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: GenreLayoutProps) {
     word.charAt(0).toUpperCase() + word.slice(1)
   ).join(' ');
   
-  const seoConfig = generateGenrePageSEO(genreName, `https://movies.n123movie.me/genre/${slug}`);
+  const seoConfig = generateGenrePageSEO(genreName, `https://ww1.n123movie.me/genre/${slug}`);
   return generateMovieMetadata(seoConfig);
 }
 

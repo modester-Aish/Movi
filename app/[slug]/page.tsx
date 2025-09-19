@@ -155,6 +155,114 @@ export default async function MoviePage({ params }: MoviePageProps) {
               </div>
             </div>
 
+            {/* Movie Details Section - Vertical Layout */}
+            <div className="bg-gray-100 p-6">
+              <div className="flex gap-6">
+                {/* Left side - Movie Poster */}
+                <div className="flex-shrink-0">
+                  <div className="w-48">
+                    <Image
+                      src={movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : '/placeholder.svg'}
+                      alt={`${movie.title} movie poster`}
+                      width={192}
+                      height={288}
+                      className="rounded-lg"
+                    />
+                    <Link 
+                      href="/"
+                      className="w-full mt-4 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg font-medium text-center block transition-colors"
+                    >
+                      Trailer
+                    </Link>
+                  </div>
+                </div>
+
+                {/* Right side - Movie Details */}
+                <div className="flex-1">
+                  {/* Movie Title */}
+                  <h1 className="text-2xl font-bold text-black mb-3">
+                    {movie.title}
+                  </h1>
+
+                  {/* Synopsis */}
+                  <p className="text-black italic mb-4 leading-relaxed">
+                    {movie.overview}
+                  </p>
+
+                  {/* Movie Details - Horizontal layout */}
+                  <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div className="flex">
+                      <span className="font-bold text-black w-20">Genre:</span>
+                      <span className="text-green-500 ml-2">
+                        {movie.genres?.slice(0, 3).map((genre, index) => 
+                          `${genre.name}${index < Math.min(movie.genres?.length || 0, 3) - 1 ? ', ' : ''}`
+                        ).join('') || 'N/A'}
+                      </span>
+                    </div>
+
+                    <div className="flex">
+                      <span className="font-bold text-black w-20">Actor:</span>
+                      <span className="text-green-500 ml-2">N/A</span>
+                    </div>
+
+                    <div className="flex">
+                      <span className="font-bold text-black w-20">Director:</span>
+                      <span className="text-green-500 ml-2">N/A</span>
+                    </div>
+
+                    <div className="flex">
+                      <span className="font-bold text-black w-20">Country:</span>
+                      <span className="text-green-500 ml-2">N/A</span>
+                    </div>
+
+                    <div className="flex">
+                      <span className="font-bold text-black w-20">Quality:</span>
+                      <span className="bg-yellow-400 text-yellow-900 px-2 py-1 rounded text-xs font-medium ml-2">
+                        HD
+                      </span>
+                    </div>
+
+                    <div className="flex">
+                      <span className="font-bold text-black w-20">Duration:</span>
+                      <span className="text-green-500 ml-2">
+                        {movie.runtime ? `${Math.floor(movie.runtime / 60)}h ${movie.runtime % 60}m` : 'N/A'}
+                      </span>
+                    </div>
+
+                    <div className="flex">
+                      <span className="font-bold text-black w-20">Release:</span>
+                      <span className="text-green-500 ml-2">
+                        {getYear(movie.release_date)}
+                      </span>
+                    </div>
+
+                    <div className="flex">
+                      <span className="font-bold text-black w-20">IMDb:</span>
+                      <span className="text-green-500 ml-2">
+                        {movie.vote_average ? `${movie.vote_average.toFixed(1)}/10` : 'N/A'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons - Left side top */}
+                  <div className="flex flex-col gap-2">
+                    <Link 
+                      href="/"
+                      className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium text-center transition-colors"
+                    >
+                      Stream in HD
+                    </Link>
+                    <Link 
+                      href="/"
+                      className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium text-center transition-colors"
+                    >
+                      Download in HD
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Video Title */}
             <div className="space-y-3">
               <h1 className="text-xl font-medium text-gray-900 leading-tight">
@@ -176,93 +284,13 @@ export default async function MoviePage({ params }: MoviePageProps) {
             {/* Description */}
             <div className="bg-gray-50 rounded-lg p-4">
               <div className="space-y-3">
-                <div className="flex items-center space-x-4 text-sm text-gray-600">
-                  <span>1,234 comments</span>
-                  <span>•</span>
-                  <span>Sort by</span>
-                  <select className="bg-transparent text-gray-600 font-medium">
-                    <option>Top comments</option>
-                    <option>Newest first</option>
-                  </select>
-                </div>
-                
-                <p className="text-gray-800 leading-relaxed">
+                <h3 className="text-lg font-semibold text-gray-900">Synopsis</h3>
+                <p className="text-gray-800 leading-relaxed italic">
                   {movie.overview}
                 </p>
-                
-                {/* Genres */}
-                <div className="flex flex-wrap gap-2">
-                  {movie.genres?.map((genre) => (
-                    <span
-                      key={genre.id}
-                      className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium"
-                    >
-                      #{genre.name}
-                    </span>
-                  ))}
-                </div>
               </div>
             </div>
 
-            {/* Comments */}
-            <div className="space-y-4">
-              {/* Comment Input */}
-              <div className="flex items-start space-x-3">
-                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-                  <span className="text-white font-bold text-xs">U</span>
-                </div>
-                <div className="flex-1">
-                  <textarea
-                    placeholder="Add a comment..."
-                    className="w-full bg-transparent text-gray-900 placeholder-gray-500 border-b border-gray-300 pb-2 focus:outline-none focus:border-gray-900 resize-none"
-                    rows={1}
-                  />
-                </div>
-              </div>
-
-              {/* Sample Comments */}
-              <div className="space-y-4">
-                <div className="flex items-start space-x-3">
-                  <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
-                    <span className="text-white font-bold text-xs">M</span>
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2 mb-1">
-                      <span className="text-gray-900 font-medium text-sm">MovieLover123</span>
-                      <span className="text-gray-500 text-xs">2 hours ago</span>
-                    </div>
-                    <p className="text-gray-800 text-sm mb-2">
-                      Amazing movie! The cinematography is absolutely stunning. Highly recommend watching this classic.
-                    </p>
-                    <div className="flex items-center space-x-4 text-gray-500 text-xs">
-                      <button className="hover:text-gray-700 transition-colors">👍 12</button>
-                      <button className="hover:text-gray-700 transition-colors">👎</button>
-                      <button className="hover:text-gray-700 transition-colors">Reply</button>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-start space-x-3">
-                  <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
-                    <span className="text-white font-bold text-xs">C</span>
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2 mb-1">
-                      <span className="text-gray-900 font-medium text-sm">CinemaFan</span>
-                      <span className="text-gray-500 text-xs">5 hours ago</span>
-                    </div>
-                    <p className="text-gray-800 text-sm mb-2">
-                      One of the best movies I've watched this year. The story is engaging and the acting is top-notch!
-                    </p>
-                    <div className="flex items-center space-x-4 text-gray-500 text-xs">
-                      <button className="hover:text-gray-700 transition-colors">👍 8</button>
-                      <button className="hover:text-gray-700 transition-colors">👎</button>
-                      <button className="hover:text-gray-700 transition-colors">Reply</button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* Right Column - Recommended Movies (25%) */}
