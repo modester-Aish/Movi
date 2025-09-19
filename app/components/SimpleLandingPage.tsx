@@ -5,12 +5,12 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { getYear, searchMoviesByTitle } from "@/api/tmdb";
-import type { Movie } from "@/api/tmdb";
+import type { Movie, MovieListItem } from "@/api/tmdb";
 import { generateMovieUrl } from "@/lib/slug";
 
 export default function SimpleLandingPage() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [searchResults, setSearchResults] = useState<Movie[]>([]);
+  const [searchResults, setSearchResults] = useState<MovieListItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const router = useRouter();
@@ -30,14 +30,6 @@ export default function SimpleLandingPage() {
           .map(movie => ({
             ...movie,
             imdb_id: movie.imdb_id!,
-            overview: movie.overview || '',
-            genres: movie.genres || [],
-            vote_count: movie.vote_count || 0,
-            popularity: movie.popularity || 0,
-            adult: movie.adult || false,
-            original_language: movie.original_language || 'en',
-            original_title: movie.original_title || movie.title,
-            backdrop_path: movie.backdrop_path || null,
           }));
         setSearchResults(moviesData);
       }
@@ -48,7 +40,7 @@ export default function SimpleLandingPage() {
     setLoading(false);
   };
 
-  const handleMovieClick = (movie: Movie) => {
+  const handleMovieClick = (movie: MovieListItem) => {
     router.push(generateMovieUrl(movie.title, movie.imdb_id || ''));
   };
 
@@ -91,7 +83,7 @@ export default function SimpleLandingPage() {
             </form>
           </div>
 
-          <Link href="/movies" className="inline-block bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors">
+          <Link href="/home" className="inline-block bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors">
             Use the old 123Movies? Click here
           </Link>
         </div>
