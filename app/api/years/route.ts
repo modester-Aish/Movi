@@ -52,7 +52,7 @@ export async function GET() {
       .sort((a, b) => b[0] - a[0]) // Sort decades in descending order
       .map(([decade, years]) => ({
         decade: `${decade}s`,
-        years: years.sort((a, b) => b - a)
+        years: years.sort((a: number, b: number) => b - a)
       }));
 
     return NextResponse.json({

@@ -140,7 +140,8 @@ export async function GET(request: NextRequest) {
 
     // If any section is empty, fill with latest movies
     Object.keys(sections).forEach(key => {
-      const sectionMovies = sections[key as keyof typeof sections];
+      const sectionKey = key as keyof typeof sections;
+      const sectionMovies = sections[sectionKey];
       if (sectionMovies.length < 70) {
         const additionalMovies = allMovies
           .filter(movie => 
@@ -150,7 +151,7 @@ export async function GET(request: NextRequest) {
           .slice(0, 70 - sectionMovies.length);
         
         additionalMovies.forEach(movie => usedMovieIds.add(movie.imdb_id));
-        sections[key as keyof typeof sections] = [...sectionMovies, ...additionalMovies];
+        (sections as any)[sectionKey] = [...sectionMovies, ...additionalMovies];
       }
     });
 

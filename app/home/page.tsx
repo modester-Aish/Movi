@@ -286,7 +286,7 @@ export default function HomePage() {
                   {movie.title}
                 </h3>
                 <p className="text-gray-400 text-xs">
-                  {movie.year || new Date(movie.release_date).getFullYear()}
+                  {(movie as any).year || new Date(movie.release_date).getFullYear()}
                 </p>
               </Link>
             ))}
