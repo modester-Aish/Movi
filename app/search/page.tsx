@@ -8,6 +8,7 @@ import { getMoviesByImdbIds, getYear, searchMoviesByTitle } from "@/api/tmdb";
 import { getRandomMovieIds } from "@/data/bulkMovieIds";
 import type { Movie } from "@/api/tmdb";
 import { generateMovieUrl } from "@/lib/slug";
+import Head from "next/head";
 
 function SearchResultsContent() {
   const searchParams = useSearchParams();
@@ -78,11 +79,11 @@ function SearchResultsContent() {
           <div className="flex flex-col items-center justify-center min-h-[60vh]">
             <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-purple-500"></div>
             <p className="mt-4 text-gray-400 text-lg">Searching for &quot;{query}&quot;...</p>
-          </div>
         </div>
       </div>
-    );
-  }
+    </div>
+  );
+}
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
@@ -191,17 +192,22 @@ function SearchResultsContent() {
 
 export default function SearchResultsPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex flex-col items-center justify-center min-h-[60vh]">
-            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-purple-500"></div>
-            <p className="mt-4 text-gray-400 text-lg">Loading...</p>
+    <>
+      <Head>
+        <link rel="canonical" href="https://ww1.n123movie.me/search" />
+      </Head>
+      <Suspense fallback={
+        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="flex flex-col items-center justify-center min-h-[60vh]">
+              <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-purple-500"></div>
+              <p className="mt-4 text-gray-400 text-lg">Loading...</p>
+            </div>
           </div>
         </div>
-      </div>
-    }>
-      <SearchResultsContent />
-    </Suspense>
+      }>
+        <SearchResultsContent />
+      </Suspense>
+    </>
   );
 }

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import Head from 'next/head';
 
 interface YearsData {
   years: number[];
@@ -61,7 +62,11 @@ export default function YearsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900">
+    <>
+      <Head>
+        <link rel="canonical" href="https://ww1.n123movie.me/years" />
+      </Head>
+      <div className="min-h-screen bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-white mb-4">Movies by Year</h1>
@@ -152,5 +157,6 @@ export default function YearsPage() {
         )}
       </div>
     </div>
+    </>
   );
 }

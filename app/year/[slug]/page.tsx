@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import MovieCard from "@/components/MovieCard";
+import Head from 'next/head';
 
 // Movie type based on our processed data
 interface ProcessedMovie {
@@ -101,7 +102,11 @@ export default function YearPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900">
+    <>
+      <Head>
+        <link rel="canonical" href={`https://ww1.n123movie.me/year/${year}`} />
+      </Head>
+      <div className="min-h-screen bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -210,5 +215,6 @@ export default function YearPage() {
         )}
       </div>
     </div>
+    </>
   );
 }

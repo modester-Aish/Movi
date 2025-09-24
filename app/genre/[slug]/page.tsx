@@ -7,6 +7,7 @@ import { getMoviesByImdbIds } from "@/api/tmdb";
 import { BULK_MOVIE_IDS } from "@/data/bulkMovieIds";
 import type { Movie } from "@/api/tmdb";
 import { generateMovieUrl } from "@/lib/slug";
+import Head from "next/head";
 
 interface GenrePageProps {
   params: Promise<{
@@ -95,7 +96,11 @@ export default function GenrePage({ params }: GenrePageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900">
+    <>
+      <Head>
+        <link rel="canonical" href={`https://ww1.n123movie.me/genre/${genreSlug}`} />
+      </Head>
+      <div className="min-h-screen bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <h1 className="text-3xl font-bold text-white mb-8">{genreName} Movies</h1>
         
@@ -175,5 +180,6 @@ export default function GenrePage({ params }: GenrePageProps) {
         )}
       </div>
     </div>
+    </>
   );
 }
