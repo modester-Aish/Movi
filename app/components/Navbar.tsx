@@ -1,12 +1,49 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import SearchModal from "./SearchModal";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [years, setYears] = useState<number[]>([]);
+  const [decades, setDecades] = useState<Array<{decade: string, years: number[]}>>([]);
+  const [progress, setProgress] = useState({processedMovies: 0, totalMovies: 95942, foundMovies: 0});
+  const [isLoadingYears, setIsLoadingYears] = useState(true);
+
+  // Fetch years data from API
+  useEffect(() => {
+    const fetchYears = async () => {
+      try {
+        const response = await fetch('/api/years');
+        const data = await response.json();
+        
+        if (data.years) {
+          setYears(data.years);
+          setDecades(data.decades || []);
+          setProgress({
+            processedMovies: data.processedMovies || 0,
+            totalMovies: data.totalMovies || 95942,
+            foundMovies: data.foundMovies || 0
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching years:', error);
+        // Fallback to static years if API fails
+        setYears([2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010, 2009, 2008, 2007, 2006, 2005, 2004, 2003, 2002, 2001, 2000]);
+      } finally {
+        setIsLoadingYears(false);
+      }
+    };
+
+    fetchYears();
+    
+    // Auto-refresh every 30 seconds to get new years as they're processed
+    const interval = setInterval(fetchYears, 30000);
+    
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <nav className="bg-black/50 backdrop-blur-sm border-b border-gray-700 sticky top-0 z-30">
@@ -164,6 +201,75 @@ export default function Navbar() {
                       </Link>
                     </div>
                   </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Years Dropdown - Dynamic */}
+            <div className="relative group">
+              <button className="text-gray-300 hover:text-white transition-colors flex items-center">
+                YEARS
+                <svg className="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+                {isLoadingYears && (
+                  <div className="ml-2 w-3 h-3 border border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+                )}
+              </button>
+              <div className="absolute top-full left-0 mt-2 w-96 bg-gray-800 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                <div className="p-4">
+                  {/* Progress indicator */}
+                  {progress.processedMovies > 0 && (
+                    <div className="mb-4 p-3 bg-gray-700 rounded-lg">
+                      <div className="text-xs text-gray-300 mb-2">
+                        Processing: {progress.processedMovies.toLocaleString()}/{progress.totalMovies.toLocaleString()} movies
+                      </div>
+                      <div className="w-full bg-gray-600 rounded-full h-2">
+                        <div 
+                          className="bg-green-500 h-2 rounded-full transition-all duration-300" 
+                          style={{ width: `${(progress.processedMovies / progress.totalMovies) * 100}%` }}
+                        ></div>
+                      </div>
+                      <div className="text-xs text-green-400 mt-1">
+                        Found: {progress.foundMovies.toLocaleString()} movies with year data
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Years organized by decades */}
+                  {decades.length > 0 ? (
+                    <div className="space-y-4 max-h-96 overflow-y-auto">
+                      {decades.map(({decade, years}) => (
+                        <div key={decade}>
+                          <h3 className="text-sm font-semibold text-gray-400 mb-2 border-b border-gray-600 pb-1">
+                            {decade}
+                          </h3>
+                          <div className="grid grid-cols-5 gap-1">
+                            {years.map(year => (
+                              <Link 
+                                key={year} 
+                                href={`/year/${year}`} 
+                                className="text-gray-300 hover:text-white transition-colors text-sm py-1 px-2 text-center rounded hover:bg-gray-700"
+                              >
+                                {year}
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      {isLoadingYears ? (
+                        <div className="text-gray-400">Loading years...</div>
+                      ) : (
+                        <div className="text-gray-400">
+                          <div>No years found yet</div>
+                          <div className="text-xs mt-1">Movie processing may not have started</div>
+                        </div>
+                      )}
+                  </div>
+                  )}
                 </div>
               </div>
             </div>

@@ -11,35 +11,122 @@ import { generateMovieUrl } from "@/lib/slug";
 export default function HomePage() {
   const [categories, setCategories] = useState<{[key: string]: Movie[]}>({});
   const [loading, setLoading] = useState(true);
+  const [activeCategory, setActiveCategory] = useState("Suggestions");
+  const [allMovies, setAllMovies] = useState<Movie[]>([]);
 
   const categoryConfig = [
-    { name: "Suggestions", startIndex: 0, count: 20 },
-    { name: "Latest Movies", startIndex: 100, count: 20 },
-    { name: "Trending Now", startIndex: 200, count: 20 },
-    { name: "Top Rated", startIndex: 300, count: 20 },
-    { name: "Action Movies", startIndex: 400, count: 20 }
+    { name: "Suggestions", startIndex: 0, count: 70 },
+    { name: "Trending Now", startIndex: 200, count: 70 },
+    { name: "Top Rated", startIndex: 300, count: 70 },
+    { name: "Top IMDB", startIndex: 400, count: 70 },
+    { name: "Action Movies", startIndex: 500, count: 70 },
+    { name: "TV Shows", startIndex: 600, count: 70 }
   ];
 
   useEffect(() => {
     loadAllCategories();
+    
+    // Auto-refresh every 60 seconds to get latest movies
+    const interval = setInterval(loadAllCategories, 60000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   const loadAllCategories = async () => {
     setLoading(true);
     try {
+      // Try to get all sections at once with unique movies
+      const response = await fetch(`/api/movies/sections?limit=70`);
+      const data = await response.json();
+      
+      if (response.ok && data.sections) {
+        // Map API categories to our category names
+        const categoryMap: {[key: string]: string} = {
+          "Suggestions": "suggestions",
+          "Trending Now": "trending",
+          "Top Rated": "top_rated",
+          "Top IMDB": "top_imdb",
+          "Action Movies": "action",
+          "TV Shows": "tv_shows"
+        };
+        
+        const categoriesData: {[key: string]: Movie[]} = {};
+        
+        for (const category of categoryConfig) {
+          const apiCategory = categoryMap[category.name];
+          if (apiCategory && data.sections[apiCategory]) {
+            categoriesData[category.name] = data.sections[apiCategory];
+            console.log(`✅ ${category.name}: ${data.sections[apiCategory].length} unique movies loaded`);
+          }
+        }
+        
+        setCategories(categoriesData);
+        
+        // Set initial movies to suggestions
+        if (data.sections.suggestions) {
+          setAllMovies(data.sections.suggestions);
+        }
+      } else {
+        console.log('⚠️ Sections API failed, using individual category loading');
+        await loadCategoriesIndividually();
+      }
+    } catch (error) {
+      console.error('Error loading sections:', error);
+      await loadCategoriesIndividually();
+    }
+    setLoading(false);
+  };
+
+  const loadCategoriesIndividually = async () => {
+    try {
       const categoriesData: {[key: string]: Movie[]} = {};
       
       for (const category of categoryConfig) {
-        const movieIds = BULK_MOVIE_IDS.slice(category.startIndex, category.startIndex + category.count);
-        const moviesData = await getMoviesByImdbIds(movieIds);
-        categoriesData[category.name] = moviesData;
+                // Map category names to API categories
+                const apiCategoryMap: {[key: string]: string} = {
+                  "Suggestions": "suggestions",
+                  "Trending Now": "trending",
+                  "Top Rated": "top_rated",
+                  "Top IMDB": "top_imdb",
+                  "Action Movies": "action",
+                  "TV Shows": "tv_shows"
+                };
+        
+        const apiCategory = apiCategoryMap[category.name] || "latest";
+        const response = await fetch(`/api/movies/latest?category=${apiCategory}&limit=${category.count}`);
+        const data = await response.json();
+        
+        if (response.ok && data.movies && data.movies.length > 0) {
+          console.log(`✅ ${category.name}: ${data.movies.length} movies loaded`);
+          categoriesData[category.name] = data.movies;
+        } else {
+          console.log(`⚠️ ${category.name}: Using fallback method`);
+          // Final fallback to old method
+          const movieIds = BULK_MOVIE_IDS.slice(category.startIndex, category.startIndex + category.count);
+          const moviesData = await getMoviesByImdbIds(movieIds);
+          categoriesData[category.name] = moviesData;
+        }
       }
       
       setCategories(categoriesData);
+      
+      // Set initial movies to suggestions
+      if (categoriesData["Suggestions"]) {
+        setAllMovies(categoriesData["Suggestions"]);
+      }
     } catch (error) {
-      console.error('Error loading categories:', error);
+      console.error('Error loading categories individually:', error);
     }
-    setLoading(false);
+  };
+
+  const handleCategoryClick = (categoryName: string) => {
+    setActiveCategory(categoryName);
+    if (categoryName === "TV Shows") {
+      // Show coming soon message for TV Shows
+      setAllMovies([]);
+    } else if (categories[categoryName]) {
+      setAllMovies(categories[categoryName]);
+    }
   };
 
   return (
@@ -103,67 +190,120 @@ export default function HomePage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         
-        {categoryConfig.map((category, categoryIndex) => (
-          <div key={category.name} className="mb-8">
-            {/* Category Header */}
-            <div className="flex items-center mb-6">
-              <button className="bg-green-600 text-white px-6 py-2 rounded font-semibold text-lg">
-                {category.name}
-              </button>
-            </div>
-            
-            {/* Movies Grid - 8 per line, 2 lines (16 total) */}
-            {loading ? (
-              <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
-                {Array.from({ length: 16 }).map((_, i) => (
-                  <div key={i} className="aspect-[2/3] bg-gray-800 rounded animate-pulse"></div>
-                ))}
-              </div>
-            ) : (
-              <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
-                {categories[category.name]?.map((movie, index) => (
-                  <Link
-                    key={`${movie.imdb_id}-${categoryIndex}-${index}`}
-                    href={generateMovieUrl(movie.title, movie.imdb_id)}
-                    className="group relative"
-                  >
-                    <div className="relative aspect-[2/3] bg-gray-800 rounded overflow-hidden shadow-lg group-hover:shadow-2xl transition-all duration-300">
-                      <Image
-                        src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-                        alt={movie.title}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.src = '/placeholder.svg';
-                        }}
-                      />
-                      
-                      {/* HD Badge */}
-                      <div className="absolute top-0.5 right-0.5 bg-yellow-500 text-black text-xs font-bold px-1 py-0.5 rounded">
-                        HD
-                      </div>
+        {/* Category Buttons - Perfect Size & Alignment */}
+        <div className="flex flex-wrap justify-center items-center gap-3 mb-8">
+          {categoryConfig.map((category) => {
+            const isActive = activeCategory === category.name;
 
-                      {/* Play Button Overlay */}
-                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <div className="w-6 h-6 bg-green-600 rounded-full flex items-center justify-center hover:bg-green-700 hover:scale-110 transition-all duration-200">
-                          <svg className="w-3 h-3 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M8 5v14l11-7z"/>
-                          </svg>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    {/* Title below poster */}
-                    <h3 className="text-white text-xs mt-1 line-clamp-1 group-hover:text-green-400 transition-colors">
-                      {movie.title}
-                    </h3>
-                  </Link>
-                ))}
-              </div>
-            )}
+            return (
+              <button
+                key={category.name}
+                onClick={() => handleCategoryClick(category.name)}
+                className={`px-5 py-3 rounded-lg font-semibold text-sm transition-all duration-300 flex items-center justify-center space-x-2 shadow-lg border min-w-[140px] h-[48px] ${
+                  isActive
+                    ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-green-500/25 border-green-400 transform scale-105'
+                    : 'bg-gradient-to-r from-green-700 to-green-800 text-green-200 hover:from-green-600 hover:to-green-700 hover:text-white border-green-600 hover:border-green-500 hover:transform hover:scale-105'
+                }`}
+              >
+                <div className={`w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 ${
+                  isActive 
+                    ? 'bg-white/30' 
+                    : 'bg-white/20'
+                }`}>
+                  <div className={`w-2 h-2 rounded-full ${
+                    isActive 
+                      ? 'bg-white' 
+                      : 'bg-white/80'
+                  }`}></div>
+                </div>
+                <span className="font-semibold text-center whitespace-nowrap">{category.name}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Movies Grid - 7 lines */}
+        {loading ? (
+          <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-7 gap-2">
+            {Array.from({ length: 70 }).map((_, i) => (
+              <div key={i} className="aspect-[2/3] bg-gray-800 rounded animate-pulse"></div>
+            ))}
           </div>
-        ))}
+        ) : activeCategory === "TV Shows" ? (
+          <div className="text-center py-16">
+            <div className="text-8xl mb-6">📺</div>
+            <h3 className="text-3xl font-bold text-white mb-4">TV Shows</h3>
+            <p className="text-xl text-gray-300 mb-6">Coming Soon!</p>
+            <p className="text-gray-400 max-w-md mx-auto">
+              We're working on adding TV shows to our collection. 
+              Stay tuned for the latest series and shows!
+            </p>
+            <div className="mt-8">
+              <div className="inline-block px-6 py-3 bg-green-600 text-white rounded-lg font-semibold">
+                Coming Soon
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-7 gap-2">
+            {allMovies.slice(0, 70).map((movie, index) => (
+              <Link
+                key={`${movie.imdb_id}-${index}`}
+                href={generateMovieUrl(movie.title, movie.imdb_id)}
+                className="group relative"
+              >
+                <div className="relative aspect-[2/3] bg-gray-800 rounded overflow-hidden shadow-lg group-hover:shadow-2xl transition-all duration-300">
+                  <Image
+                    src={movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : '/placeholder.svg'}
+                    alt={movie.title}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = '/placeholder.svg';
+                    }}
+                  />
+                  
+                  {/* Rating Badge */}
+                  {movie.vote_average && movie.vote_average > 0 && (
+                    <div className="absolute top-0.5 right-0.5 bg-yellow-500 text-black text-xs font-bold px-1 py-0.5 rounded">
+                      {movie.vote_average.toFixed(1)}
+                    </div>
+                  )}
+
+                  {/* Play Button Overlay */}
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="w-6 h-6 bg-green-600 rounded-full flex items-center justify-center hover:bg-green-700 hover:scale-110 transition-all duration-200">
+                      <svg className="w-3 h-3 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z"/>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Title below poster */}
+                <h3 className="text-white text-xs mt-1 line-clamp-1 group-hover:text-green-400 transition-colors">
+                  {movie.title}
+                </h3>
+                <p className="text-gray-400 text-xs">
+                  {movie.year || new Date(movie.release_date).getFullYear()}
+                </p>
+              </Link>
+            ))}
+          </div>
+        )}
+
+        {/* Category Info */}
+        {!loading && allMovies.length > 0 && (
+          <div className="text-center mt-6">
+            <p className="text-gray-400">
+              Showing {Math.min(allMovies.length, 70)} movies in <span className="text-green-400 font-semibold">{activeCategory}</span>
+            </p>
+            <p className="text-gray-500 text-sm mt-1">
+              {allMovies.length > 70 ? `(${allMovies.length} total available)` : ''}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Footer */}

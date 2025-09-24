@@ -9,6 +9,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
     const country = searchParams.get('country');
+    const year = searchParams.get('year');
     const limit = parseInt(searchParams.get('limit') || '20');
     const page = parseInt(searchParams.get('page') || '1');
     const random = searchParams.get('random') === 'true';
@@ -22,6 +23,22 @@ export async function GET(request: NextRequest) {
     
     if (country) {
       query.country = country;
+    }
+    
+    if (year) {
+      // Handle decade ranges (e.g., "1990s", "1980s")
+      if (year.endsWith('s') && year.length === 5) {
+        const decade = parseInt(year.slice(0, 4));
+        const startYear = decade;
+        const endYear = decade + 9;
+        query.year = { $gte: startYear, $lte: endYear };
+      } else {
+        // Handle specific year
+        const yearNum = parseInt(year);
+        if (!isNaN(yearNum)) {
+          query.year = yearNum;
+        }
+      }
     }
 
     let movies;
