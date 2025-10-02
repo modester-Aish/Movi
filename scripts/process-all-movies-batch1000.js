@@ -177,6 +177,64 @@ function saveProgress(batchNumber, batchResults) {
   }
   
   console.log(`   💾 Batch ${batchNumber} results saved to: ${batchPath}`);
+  
+  // Update years cache file for frontend
+  updateYearsCache(progressData);
+}
+
+// Function to update years cache for frontend
+function updateYearsCache(progressData) {
+  try {
+    const cachePath = path.join(__dirname, 'years-cache.json');
+    
+    // Read existing cache or create new one
+    let cacheData = {};
+    if (fs.existsSync(cachePath)) {
+      cacheData = JSON.parse(fs.readFileSync(cachePath, 'utf8'));
+    }
+    
+    // Extract years from yearStats
+    const years = Object.keys(progressData.yearStats || {})
+      .map(year => parseInt(year))
+      .sort((a, b) => b - a); // Sort in descending order (newest first)
+
+    // Create decades for better organization
+    const decades = new Map();
+    years.forEach(year => {
+      const decade = Math.floor(year / 10) * 10;
+      if (!decades.has(decade)) {
+        decades.set(decade, []);
+      }
+      decades.get(decade).push(year);
+    });
+
+    // Format decades for frontend
+    const decadesArray = Array.from(decades.entries())
+      .sort((a, b) => b[0] - a[0]) // Sort decades in descending order
+      .map(([decade, years]) => ({
+        decade: `${decade}s`,
+        years: years.sort((a, b) => b - a)
+      }));
+
+    // Update cache data
+    cacheData = {
+      years: years,
+      decades: decadesArray,
+      totalMovies: 95942, // Total movies in bulk file
+      processedMovies: progressData.processedCount || 0,
+      foundMovies: progressData.foundCount || 0,
+      progress: progressData.progress || '0.00',
+      lastUpdate: progressData.lastUpdate,
+      yearStats: progressData.yearStats || {}
+    };
+    
+    // Write updated cache
+    fs.writeFileSync(cachePath, JSON.stringify(cacheData, null, 2));
+    console.log(`   🔄 Frontend cache updated: ${progressData.foundCount} movies`);
+    
+  } catch (error) {
+    console.error('   ❌ Error updating years cache:', error);
+  }
 }
 
 // Function to generate comprehensive final report
@@ -309,7 +367,21 @@ async function processAllMovies() {
   
   console.log(`📦 Processing ${batches.length} batches...\n`);
   
-  for (let i = 0; i < batches.length; i++) {
+  // Check if we have existing progress and start from there
+  let startBatchIndex = 0;
+  if (fs.existsSync(progressPath)) {
+    const progress = JSON.parse(fs.readFileSync(progressPath, 'utf8'));
+    startBatchIndex = progress.batchNumber - 1; // Convert to 0-based index
+    console.log(`📁 Resuming from batch ${progress.batchNumber} (${progress.processedCount.toLocaleString()} movies processed)`);
+    
+    // Update global counters from existing progress
+    processedCount = progress.processedCount;
+    foundCount = progress.foundCount;
+    errorCount = progress.errorCount;
+    yearStats = progress.yearStats || {};
+  }
+  
+  for (let i = startBatchIndex; i < batches.length; i++) {
     const batch = batches[i];
     const batchNumber = i + 1;
     

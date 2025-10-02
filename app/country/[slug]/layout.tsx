@@ -14,8 +14,13 @@ export async function generateMetadata({ params }: CountryLayoutProps) {
     word.charAt(0).toUpperCase() + word.slice(1)
   ).join(' ');
   
-  const seoConfig = generateCountryPageSEO(countryName, `${getBaseUrl()}/${slug}`);
-  return generateMovieMetadata(seoConfig);
+  const seoConfig = generateCountryPageSEO(countryName, `${getBaseUrl()}/country/${slug}`);
+  return {
+    ...generateMovieMetadata(seoConfig),
+    alternates: {
+      canonical: `https://ww1.n123movie.me/country/${slug}`,
+    },
+  };
 }
 
 export default function CountryLayout({ children }: CountryLayoutProps) {

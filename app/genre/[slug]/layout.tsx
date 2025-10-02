@@ -14,8 +14,13 @@ export async function generateMetadata({ params }: GenreLayoutProps) {
     word.charAt(0).toUpperCase() + word.slice(1)
   ).join(' ');
   
-  const seoConfig = generateGenrePageSEO(genreName, `${getBaseUrl()}/${slug}`);
-  return generateMovieMetadata(seoConfig);
+  const seoConfig = generateGenrePageSEO(genreName, `${getBaseUrl()}/genre/${slug}`);
+  return {
+    ...generateMovieMetadata(seoConfig),
+    alternates: {
+      canonical: `https://ww1.n123movie.me/genre/${slug}`,
+    },
+  };
 }
 
 export default function GenreLayout({ children }: GenreLayoutProps) {
