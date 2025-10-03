@@ -142,7 +142,7 @@ export default async function MoviePage({ params }: MoviePageProps) {
           <div className="flex-1 lg:w-3/4 space-y-4">
             {/* Video Player */}
             <div className="bg-black rounded-lg overflow-hidden">
-              <div className="relative pt-[56.25%]">
+              <div className="relative pt-[56.25%] w-full">
                 <iframe
                   className="absolute top-0 left-0 w-full h-full"
                   src={`https://vidsrc.to/embed/movie/${imdbId}`}
@@ -156,18 +156,18 @@ export default async function MoviePage({ params }: MoviePageProps) {
               </div>
             </div>
 
-            {/* Movie Details Section - Vertical Layout */}
-            <div className="bg-gray-100 p-6">
-              <div className="flex gap-6">
+            {/* Movie Details Section - Responsive Layout */}
+            <div className="bg-gray-100 p-4 md:p-6">
+              <div className="flex flex-col md:flex-row gap-4 md:gap-6">
                 {/* Left side - Movie Poster */}
-                <div className="flex-shrink-0">
-                  <div className="w-48">
+                <div className="flex-shrink-0 mx-auto md:mx-0">
+                  <div className="w-32 md:w-48">
                     <Image
                       src={movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : '/placeholder.svg'}
                       alt={`${movie.title} movie poster`}
                       width={192}
                       height={288}
-                      className="rounded-lg"
+                      className="rounded-lg w-full h-auto"
                     />
                     <Link 
                       href="/"
@@ -190,8 +190,8 @@ export default async function MoviePage({ params }: MoviePageProps) {
                     {movie.overview}
                   </p>
 
-                  {/* Movie Details - Horizontal layout */}
-                  <div className="grid grid-cols-2 gap-4 mb-6">
+                  {/* Movie Details - Responsive grid layout */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                     <div className="flex">
                       <span className="font-bold text-black w-20">Genre:</span>
                       <span className="text-green-500 ml-2">
@@ -245,17 +245,17 @@ export default async function MoviePage({ params }: MoviePageProps) {
                     </div>
                   </div>
 
-                  {/* Action Buttons - Left side top */}
-                  <div className="flex flex-col gap-2">
+                  {/* Action Buttons - Responsive layout */}
+                  <div className="flex flex-col sm:flex-row gap-2 mt-4">
                     <Link 
                       href="/"
-                      className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium text-center transition-colors"
+                      className="bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg font-medium text-center transition-colors flex-1"
                     >
                       Stream in HD
                     </Link>
                     <Link 
                       href="/"
-                      className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium text-center transition-colors"
+                      className="bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg font-medium text-center transition-colors flex-1"
                     >
                       Download in HD
                     </Link>
@@ -271,13 +271,13 @@ export default async function MoviePage({ params }: MoviePageProps) {
               </h1>
               
               {/* Video Stats */}
-              <div className="flex items-center space-x-6 text-sm text-gray-600">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-6 text-sm text-gray-600">
                 <span>1.2M views</span>
-                <span>•</span>
+                <span className="hidden sm:inline">•</span>
                 <span>{getYear(movie.release_date)}</span>
-                <span>•</span>
+                <span className="hidden sm:inline">•</span>
                 <span>{movie.runtime || 'N/A'} min</span>
-                <span>•</span>
+                <span className="hidden sm:inline">•</span>
                 <span>⭐ {movie.vote_average?.toFixed(1) || 'N/A'}</span>
               </div>
             </div>
@@ -297,14 +297,14 @@ export default async function MoviePage({ params }: MoviePageProps) {
           {/* Right Column - Recommended Movies (25%) */}
           <div className="w-full lg:w-1/4 space-y-4">
             {/* Filter Tabs */}
-            <div className="flex items-center space-x-2 text-sm">
+            <div className="flex flex-wrap items-center gap-2 text-sm">
               <button className="bg-gray-200 text-gray-800 px-3 py-1 rounded-full font-medium">All</button>
               <button className="text-gray-600 px-3 py-1 rounded-full hover:bg-gray-100 transition-colors">From movies123</button>
               <button className="text-gray-600 px-3 py-1 rounded-full hover:bg-gray-100 transition-colors">Related</button>
             </div>
 
             {/* Recommended Movies List */}
-            <div className="space-y-3 max-h-screen overflow-y-auto">
+            <div className="space-y-3 max-h-96 lg:max-h-screen overflow-y-auto">
               {similarMovies
                 .filter((similarMovie) => similarMovie.imdb_id && similarMovie.imdb_id.trim() !== '')
                 .slice(0, 8)
@@ -314,7 +314,7 @@ export default async function MoviePage({ params }: MoviePageProps) {
                   href={generateMovieUrl(similarMovie.title, similarMovie.imdb_id || '')}
                   className="flex items-start space-x-3 group hover:bg-gray-50 p-2 rounded-lg transition-colors"
                 >
-                  <div className="relative w-32 h-20 rounded overflow-hidden flex-shrink-0">
+                  <div className="relative w-24 h-16 sm:w-32 sm:h-20 rounded overflow-hidden flex-shrink-0">
                     <Image
                       src={similarMovie.poster_path ? `https://image.tmdb.org/t/p/w300${similarMovie.poster_path}` : '/placeholder.svg'}
                       alt={`${similarMovie.title} movie poster`}
@@ -326,7 +326,7 @@ export default async function MoviePage({ params }: MoviePageProps) {
                     </div>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h4 className="text-gray-900 text-sm font-medium line-clamp-2 group-hover:text-blue-600 transition-colors">
+                    <h4 className="text-gray-900 text-xs sm:text-sm font-medium line-clamp-2 group-hover:text-blue-600 transition-colors">
                       {similarMovie.title}
                     </h4>
                     <p className="text-gray-600 text-xs mt-1">movies123</p>
