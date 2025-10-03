@@ -134,9 +134,6 @@ export default async function MoviePage({ params }: MoviePageProps) {
 
   return (
     <>
-      <head>
-        <link rel="canonical" href={`https://ww1.n123movie.me${generateMovieUrl(movie.title, movie.imdb_id)}`} />
-      </head>
       <div className="min-h-screen bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* YouTube Style Layout */}

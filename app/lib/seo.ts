@@ -17,8 +17,8 @@ export interface SEOConfig {
 }
 
 export function generateMovieSEO(movie: Movie, baseUrl?: string): SEOConfig {
-  // Use dynamic domain for canonical URL
-  const currentBaseUrl = baseUrl || getBaseUrl();
+  // Use ww1.n123movie.me domain for canonical URL
+  const currentBaseUrl = 'https://ww1.n123movie.me';
   const movieUrl = `${currentBaseUrl}/${movie.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')}-${movie.imdb_id}`;
   const posterUrl = movie.poster_path 
     ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
