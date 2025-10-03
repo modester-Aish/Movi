@@ -53,20 +53,20 @@ export default function Navbar() {
           <div className="flex items-center">
             <Link href="/" className="flex flex-col">
               <div className="flex items-center">
-                <span className="text-3xl font-bold text-gray-800">123</span>
-                <span className="text-2xl font-normal text-gray-500 ml-1">MOVIES</span>
-                <div className="w-6 h-6 bg-green-600 rounded ml-2 flex items-center justify-center">
-                  <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <span className="text-2xl md:text-3xl font-bold text-gray-800">123</span>
+                <span className="text-lg md:text-2xl font-normal text-gray-500 ml-1">MOVIES</span>
+                <div className="w-5 h-5 md:w-6 md:h-6 bg-green-600 rounded ml-2 flex items-center justify-center">
+                  <svg className="w-3 h-3 md:w-4 md:h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M8 5v14l11-7z"/>
                   </svg>
                 </div>
               </div>
-              <p className="text-gray-400 text-xs ml-1">Watch Your Favorite Movies Online</p>
+              <p className="text-gray-400 text-xs ml-1 hidden sm:block">Watch Your Favorite Movies Online</p>
             </Link>
           </div>
           
           {/* Navigation - Center */}
-          <div className="hidden lg:flex items-center space-x-6">
+          <div className="hidden md:flex items-center space-x-6">
             <Link href="/home" className="text-white hover:text-red-400 transition-colors font-medium">
               HOME
               </Link>
@@ -279,8 +279,8 @@ export default function Navbar() {
             </Link>
           </div>
 
-          {/* Search Bar - Right */}
-          <div className="flex items-center space-x-3">
+          {/* Search Bar - Right (Hidden on mobile) */}
+          <div className="hidden md:flex items-center space-x-3">
             <div className="relative">
               <input
                 type="text"
@@ -296,10 +296,10 @@ export default function Navbar() {
           </div>
 
           {/* Mobile menu button - Right */}
-          <div className="md:hidden absolute right-0">
+          <div className="md:hidden flex items-center">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-gray-300 hover:text-white focus:outline-none focus:text-white"
+              className="text-gray-300 hover:text-white focus:outline-none focus:text-white p-2"
             >
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 {isMenuOpen ? (
@@ -316,26 +316,52 @@ export default function Navbar() {
       {/* Mobile menu */}
       {isMenuOpen && (
         <div className="md:hidden bg-gray-900 border-t border-gray-700">
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            <Link href="/home" className="text-white hover:text-red-400 block px-3 py-2 rounded-md text-base font-medium">
+          <div className="px-4 pt-2 pb-3 space-y-1">
+            <Link 
+              href="/home" 
+              className="text-white hover:text-red-400 block px-3 py-2 rounded-md text-base font-medium transition-colors"
+              onClick={() => setIsMenuOpen(false)}
+            >
               Home
             </Link>
-            <Link href="/movies" className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium">
+            <Link 
+              href="/movies" 
+              className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors"
+              onClick={() => setIsMenuOpen(false)}
+            >
               Movies
             </Link>
-            <Link href="/genres" className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium">
+            <Link 
+              href="/genres" 
+              className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors"
+              onClick={() => setIsMenuOpen(false)}
+            >
               Genres
             </Link>
-            <Link href="/country" className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium">
+            <Link 
+              href="/country" 
+              className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors"
+              onClick={() => setIsMenuOpen(false)}
+            >
               Country
+            </Link>
+            <Link 
+              href="/years" 
+              className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Years
             </Link>
             <div className="pt-4 pb-3 border-t border-gray-700">
               <div className="px-3 py-2">
                 <button
-                  onClick={() => setIsSearchOpen(true)}
+                  onClick={() => {
+                    setIsSearchOpen(true);
+                    setIsMenuOpen(false);
+                  }}
                   className="w-full bg-gray-800 text-gray-400 rounded-lg px-3 py-2 text-left hover:bg-gray-700 transition-all cursor-pointer"
                 >
-                  Search...
+                  Search movies or series...
                 </button>
               </div>
             </div>
