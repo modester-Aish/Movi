@@ -23,7 +23,7 @@ export default function Navbar() {
           setYears(data.years);
           
           // Process decades to move 2026 and 2027 into 2025 decade
-          const processedDecades = (data.decades || []).map(decadeData => {
+          const processedDecades = (data.decades || []).map((decadeData: {decade: string, years: number[]}) => {
             if (decadeData.decade === "2020s") {
               // Move 2026 and 2027 to 2025 decade if they exist
               const years2025 = decadeData.years.filter(year => year <= 2025);
@@ -37,9 +37,9 @@ export default function Navbar() {
               // Add 2026 and 2027 to 2025 decade
               const allYears = [...decadeData.years];
               const originalDecades = data.decades || [];
-              const decade2020s = originalDecades.find(d => d.decade === "2020s");
+              const decade2020s = originalDecades.find((d: {decade: string, years: number[]}) => d.decade === "2020s");
               if (decade2020s) {
-                const years2026_2027 = decade2020s.years.filter(year => year === 2026 || year === 2027);
+                const years2026_2027 = decade2020s.years.filter((year: number) => year === 2026 || year === 2027);
                 allYears.push(...years2026_2027);
               }
               return {
