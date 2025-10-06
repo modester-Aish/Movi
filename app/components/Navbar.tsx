@@ -21,7 +21,36 @@ export default function Navbar() {
         
         if (data.years) {
           setYears(data.years);
-          setDecades(data.decades || []);
+          
+          // Process decades to move 2026 and 2027 into 2025 decade
+          const processedDecades = (data.decades || []).map(decadeData => {
+            if (decadeData.decade === "2020s") {
+              // Move 2026 and 2027 to 2025 decade if they exist
+              const years2025 = decadeData.years.filter(year => year <= 2025);
+              const years2026_2027 = decadeData.years.filter(year => year === 2026 || year === 2027);
+              
+              return {
+                ...decadeData,
+                years: years2025
+              };
+            } else if (decadeData.decade === "2025s") {
+              // Add 2026 and 2027 to 2025 decade
+              const allYears = [...decadeData.years];
+              const originalDecades = data.decades || [];
+              const decade2020s = originalDecades.find(d => d.decade === "2020s");
+              if (decade2020s) {
+                const years2026_2027 = decade2020s.years.filter(year => year === 2026 || year === 2027);
+                allYears.push(...years2026_2027);
+              }
+              return {
+                ...decadeData,
+                years: allYears.sort((a, b) => b - a)
+              };
+            }
+            return decadeData;
+          });
+          
+          setDecades(processedDecades);
           setProgress({
             processedMovies: data.processedMovies || 0,
             totalMovies: data.totalMovies || 95942,
@@ -136,67 +165,67 @@ export default function Navbar() {
                   <div className="grid grid-cols-3 gap-4">
                     <div className="space-y-2">
                       <Link href="/country/united-states" className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors text-sm py-1">
-                        <span className="text-lg">🇺🇸</span>
+                        <img src="https://flagcdn.com/w20/us.png" alt="US" className="w-5 h-3 object-cover rounded-sm" />
                         <span>United States</span>
                       </Link>
                       <Link href="/country/united-kingdom" className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors text-sm py-1">
-                        <span className="text-lg">🇬🇧</span>
+                        <img src="https://flagcdn.com/w20/gb.png" alt="GB" className="w-5 h-3 object-cover rounded-sm" />
                         <span>United Kingdom</span>
                       </Link>
                       <Link href="/country/canada" className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors text-sm py-1">
-                        <span className="text-lg">🇨🇦</span>
+                        <img src="https://flagcdn.com/w20/ca.png" alt="CA" className="w-5 h-3 object-cover rounded-sm" />
                         <span>Canada</span>
                       </Link>
                       <Link href="/country/estonia" className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors text-sm py-1">
-                        <span className="text-lg">🇪🇪</span>
+                        <img src="https://flagcdn.com/w20/ee.png" alt="EE" className="w-5 h-3 object-cover rounded-sm" />
                         <span>Estonia</span>
                       </Link>
                     </div>
                     <div className="space-y-2">
                       <Link href="/country/france" className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors text-sm py-1">
-                        <span className="text-lg">🇫🇷</span>
+                        <img src="https://flagcdn.com/w20/fr.png" alt="FR" className="w-5 h-3 object-cover rounded-sm" />
                         <span>France</span>
                       </Link>
                       <Link href="/country/georgia" className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors text-sm py-1">
-                        <span className="text-lg">🇬🇪</span>
+                        <img src="https://flagcdn.com/w20/ge.png" alt="GE" className="w-5 h-3 object-cover rounded-sm" />
                         <span>Georgia</span>
                       </Link>
                       <Link href="/country/bulgaria" className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors text-sm py-1">
-                        <span className="text-lg">🇧🇬</span>
+                        <img src="https://flagcdn.com/w20/bg.png" alt="BG" className="w-5 h-3 object-cover rounded-sm" />
                         <span>Bulgaria</span>
                       </Link>
                       <Link href="/country/brazil" className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors text-sm py-1">
-                        <span className="text-lg">🇧🇷</span>
+                        <img src="https://flagcdn.com/w20/br.png" alt="BR" className="w-5 h-3 object-cover rounded-sm" />
                         <span>Brazil</span>
                       </Link>
                     </div>
                     <div className="space-y-2">
                       <Link href="/country/china" className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors text-sm py-1">
-                        <span className="text-lg">🇨🇳</span>
+                        <img src="https://flagcdn.com/w20/cn.png" alt="CN" className="w-5 h-3 object-cover rounded-sm" />
                         <span>China</span>
                       </Link>
                       <Link href="/country/peru" className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors text-sm py-1">
-                        <span className="text-lg">🇵🇪</span>
+                        <img src="https://flagcdn.com/w20/pe.png" alt="PE" className="w-5 h-3 object-cover rounded-sm" />
                         <span>Peru</span>
                       </Link>
                       <Link href="/country/ireland" className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors text-sm py-1">
-                        <span className="text-lg">🇮🇪</span>
+                        <img src="https://flagcdn.com/w20/ie.png" alt="IE" className="w-5 h-3 object-cover rounded-sm" />
                         <span>Ireland</span>
                       </Link>
                       <Link href="/country/spain" className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors text-sm py-1">
-                        <span className="text-lg">🇪🇸</span>
+                        <img src="https://flagcdn.com/w20/es.png" alt="ES" className="w-5 h-3 object-cover rounded-sm" />
                         <span>Spain</span>
                       </Link>
                       <Link href="/country/sweden" className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors text-sm py-1">
-                        <span className="text-lg">🇸🇪</span>
+                        <img src="https://flagcdn.com/w20/se.png" alt="SE" className="w-5 h-3 object-cover rounded-sm" />
                         <span>Sweden</span>
                       </Link>
                       <Link href="/country/philippines" className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors text-sm py-1">
-                        <span className="text-lg">🇵🇭</span>
+                        <img src="https://flagcdn.com/w20/ph.png" alt="PH" className="w-5 h-3 object-cover rounded-sm" />
                         <span>Philippines</span>
                       </Link>
                       <Link href="/country/cyprus" className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors text-sm py-1">
-                        <span className="text-lg">🇨🇾</span>
+                        <img src="https://flagcdn.com/w20/cy.png" alt="CY" className="w-5 h-3 object-cover rounded-sm" />
                         <span>Cyprus</span>
                       </Link>
                     </div>
@@ -218,23 +247,6 @@ export default function Navbar() {
               </button>
               <div className="absolute top-full left-0 mt-2 w-96 bg-gray-800 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                 <div className="p-4">
-                  {/* Progress indicator */}
-                  {progress.processedMovies > 0 && (
-                    <div className="mb-4 p-3 bg-gray-700 rounded-lg">
-                      <div className="text-xs text-gray-300 mb-2">
-                        Processing: {progress.processedMovies.toLocaleString()}/{progress.totalMovies.toLocaleString()} movies
-                      </div>
-                      <div className="w-full bg-gray-600 rounded-full h-2">
-                        <div 
-                          className="bg-green-500 h-2 rounded-full transition-all duration-300" 
-                          style={{ width: `${(progress.processedMovies / progress.totalMovies) * 100}%` }}
-                        ></div>
-                      </div>
-                      <div className="text-xs text-green-400 mt-1">
-                        Found: {progress.foundMovies.toLocaleString()} movies with year data
-                      </div>
-                    </div>
-                  )}
                   
                   {/* Years organized by decades */}
                   {decades.length > 0 ? (
