@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Play button -->
+  <circle cx="16" cy="16" r="10" fill="#ff0000" stroke="#fff" stroke-width="3"/>
+  
+  <!-- Play triangle -->
+  <polygon points="10,8 10,24 24,16" fill="#fff" stroke="#000" stroke-width="1"/>
+</svg>
