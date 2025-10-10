@@ -29,45 +29,66 @@ function createSeriesSlug(name: string, id: string | number): string {
 }
 
 export default function SeriesListPage() {
-  const [displayCount, setDisplayCount] = useState(7);
-  const [allSeriesData, setAllSeriesData] = useState<SeriesWithEpisodeCount[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [allSeries, setAllSeries] = useState<SeriesWithEpisodeCount[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [totalCount, setTotalCount] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const ITEMS_PER_PAGE = 7;
   
-  // Fetch series from MongoDB API
-  useEffect(() => {
-    async function fetchSeries() {
-      try {
+  // Fetch series from MongoDB API with pagination
+  const fetchSeries = async (skip: number = 0) => {
+    try {
+      if (skip === 0) {
         setLoading(true);
-        const response = await fetch('/api/tv-series-db?limit=10000&sortBy=first_air_date&sortOrder=desc');
-        const result = await response.json();
-        
-        if (result.success && result.data) {
-          const seriesWithCount = result.data.map((series: any) => ({
-            imdb_id: series.imdb_id,
-            tmdb_id: series.tmdb_id,
-            name: series.name || `TV Series ${series.imdb_id}`,
-            overview: series.overview,
-            poster_path: series.poster_path,
-            backdrop_path: series.backdrop_path,
-            first_air_date: series.first_air_date,
-            vote_average: series.vote_average || 0,
-            number_of_seasons: series.number_of_seasons || series.seasons?.length || 0,
-            episodeCount: series.seasons?.reduce((sum: number, season: any) => sum + season.episodes.length, 0) || 0
-          }));
-          setAllSeriesData(seriesWithCount);
-        }
-      } catch (error) {
-        console.error('Error fetching series:', error);
-      } finally {
-        setLoading(false);
+      } else {
+        setLoadingMore(true);
       }
+      
+      const response = await fetch(`/api/tv-series-db?limit=${ITEMS_PER_PAGE}&skip=${skip}&sortBy=first_air_date&sortOrder=desc`);
+      const result = await response.json();
+      
+      if (result.success && result.data) {
+        const seriesWithCount = result.data.map((series: any) => ({
+          imdb_id: series.imdb_id,
+          tmdb_id: series.tmdb_id,
+          name: series.name || `TV Series ${series.imdb_id}`,
+          overview: series.overview,
+          poster_path: series.poster_path,
+          backdrop_path: series.backdrop_path,
+          first_air_date: series.first_air_date,
+          vote_average: series.vote_average || 0,
+          number_of_seasons: series.number_of_seasons || series.seasons?.length || 0,
+          episodeCount: series.seasons?.reduce((sum: number, season: any) => sum + season.episodes.length, 0) || 0
+        }));
+        
+        if (skip === 0) {
+          setAllSeries(seriesWithCount);
+        } else {
+          setAllSeries(prev => [...prev, ...seriesWithCount]);
+        }
+        
+        setTotalCount(result.total || 0);
+        setHasMore((skip + ITEMS_PER_PAGE) < (result.total || 0));
+      }
+    } catch (error) {
+      console.error('Error fetching series:', error);
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
     }
-    
-    fetchSeries();
+  };
+  
+  // Load initial series
+  useEffect(() => {
+    fetchSeries(0);
     document.title = 'TV Series - Watch TV Shows Online';
   }, []);
   
-  const allSeries = allSeriesData.slice(0, displayCount); // Show only displayCount series
+  // Load more handler
+  const handleLoadMore = () => {
+    fetchSeries(allSeries.length);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
@@ -76,7 +97,7 @@ export default function SeriesListPage() {
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-white mb-2">TV Series</h1>
           <p className="text-gray-400">
-            {loading ? 'Loading...' : `Browse ${allSeriesData.length.toLocaleString()} TV shows with ${allSeriesData.reduce((sum, s) => sum + s.episodeCount, 0).toLocaleString()} episodes`}
+            {loading ? 'Loading...' : `Browse ${totalCount.toLocaleString()} TV shows • Showing ${allSeries.length} series`}
           </p>
           <p className="text-purple-400 text-sm mt-1">📺 New releases first • Load 7 at a time for fast performance</p>
         </div>
@@ -92,7 +113,7 @@ export default function SeriesListPage() {
           <div className="text-center py-16">
             <div className="text-6xl mb-4">📺</div>
             <h2 className="text-2xl font-bold text-white mb-2">No TV Series Available</h2>
-            <p className="text-gray-400">Add episode IDs to app/data/episodeIds.ts to get started</p>
+            <p className="text-gray-400">Run migration script to import TV series data</p>
           </div>
         ) : (
           <>
@@ -143,16 +164,17 @@ export default function SeriesListPage() {
             </div>
             
             {/* Load More Button */}
-            {displayCount < allSeriesData.length && (
+            {hasMore && (
               <div className="text-center mt-8">
                 <button
-                  onClick={() => setDisplayCount(prev => Math.min(prev + 7, allSeriesData.length))}
-                  className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors shadow-lg"
+                  onClick={handleLoadMore}
+                  disabled={loadingMore}
+                  className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-8 py-3 rounded-lg font-semibold transition-colors shadow-lg"
                 >
-                  Load More ({allSeriesData.length - displayCount} remaining)
+                  {loadingMore ? 'Loading...' : `Load More (${totalCount - allSeries.length} remaining)`}
                 </button>
                 <p className="text-gray-400 text-sm mt-2">
-                  Showing {displayCount} of {allSeriesData.length} series
+                  Showing {allSeries.length} of {totalCount.toLocaleString()} series
                 </p>
               </div>
             )}

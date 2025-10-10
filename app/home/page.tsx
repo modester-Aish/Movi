@@ -18,36 +18,33 @@ function TVSeriesDisplay({ activeCategory, categoryConfig }: { activeCategory: s
   const [allStaticSeries, setAllStaticSeries] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
-  // Load series data ONLY when component mounts (when user switches to TV mode)
+  // Load series data from MongoDB API (when user switches to TV mode)
   useEffect(() => {
     setLoading(true);
     
-    // Dynamic import - load TV data only when needed (lazy loading)
-    import('@/data/tvSeriesStatic').then(({ TV_SERIES_STATIC }) => {
-      const seriesData = Object.entries(TV_SERIES_STATIC)
-        .filter(([_, data]) => data.name) // Only series with names
-        .sort((a, b) => {
-          // Sort by first_air_date (newest first)
-          const dateA = a[1].first_air_date ? new Date(a[1].first_air_date).getTime() : 0;
-          const dateB = b[1].first_air_date ? new Date(b[1].first_air_date).getTime() : 0;
-          return dateB - dateA; // Newest first
-        })
-        .map(([imdbId, data]) => ({
-          imdbId,
-          tmdbId: data.tmdb_id,
-          name: data.name || `TV Series ${imdbId}`,
-          poster: data.poster_path,
-          backdrop: data.backdrop_path,
-          overview: data.overview,
-          firstAirDate: data.first_air_date,
-          voteAverage: data.vote_average || 0,
-          episodeCount: data.seasons?.reduce((sum, season) => sum + season.episodes.length, 0) || 0,
-          numberOfSeasons: data.number_of_seasons || data.seasons?.length || 0
-        }));
-      
-      setAllStaticSeries(seriesData);
-      setLoading(false);
-    }).catch(error => {
+    // Fetch only 100 series for fast loading (pagination will handle rest)
+    fetch('/api/tv-series-db?limit=100&sortBy=first_air_date&sortOrder=desc')
+      .then(res => res.json())
+      .then(result => {
+        if (result.success && result.data) {
+          const seriesData = result.data.map((data: any) => ({
+            imdbId: data.imdb_id,
+            tmdbId: data.tmdb_id,
+            name: data.name || `TV Series ${data.imdb_id}`,
+            poster: data.poster_path,
+            backdrop: data.backdrop_path,
+            overview: data.overview,
+            firstAirDate: data.first_air_date,
+            voteAverage: data.vote_average || 0,
+            episodeCount: data.seasons?.reduce((sum: number, season: any) => sum + season.episodes.length, 0) || 0,
+            numberOfSeasons: data.number_of_seasons || data.seasons?.length || 0
+          }));
+          
+          setAllStaticSeries(seriesData);
+        }
+        setLoading(false);
+      })
+      .catch(error => {
       console.error('Error loading TV series data:', error);
       setLoading(false);
     });
