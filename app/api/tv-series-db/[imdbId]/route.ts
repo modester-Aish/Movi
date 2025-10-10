@@ -1,6 +1,6 @@
 // API Route: Fetch Single TV Series by IMDB ID from MongoDB
 import { NextRequest, NextResponse } from 'next/server';
-import clientPromise from '@/utils/mongodb';
+import clientPromise from '@/lib/mongodb-client';
 
 export const dynamic = 'force-dynamic';
 

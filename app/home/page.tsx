@@ -12,18 +12,42 @@ import type { Movie } from "@/api/tmdb";
 import { generateMovieUrl } from "@/lib/slug";
 import { getTVImageUrl } from "@/api/tmdb-tv";
 
-// TV Series Display Component - Using Static Data (Optimized for Fast Loading)
+// TV Series Display Component - Lazy Loading for Categories
 function TVSeriesDisplay({ activeCategory, categoryConfig }: { activeCategory: string, categoryConfig: any[] }) {
   const [displayCount, setDisplayCount] = useState(7); // Load only 7 initially
-  const [allStaticSeries, setAllStaticSeries] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [categorySeries, setCategorySeries] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [loadedCategories, setLoadedCategories] = useState<Set<string>>(new Set());
   
-  // Load series data from MongoDB API (when user switches to TV mode)
+  // Load series data for specific category (lazy loading)
   useEffect(() => {
+    // If category already loaded, don't reload
+    if (loadedCategories.has(activeCategory)) {
+      return;
+    }
+    
     setLoading(true);
     
-    // Fetch only 100 series for fast loading (pagination will handle rest)
-    fetch('/api/tv-series-db?limit=100&sortBy=first_air_date&sortOrder=desc')
+    // Determine sort order based on category
+    let sortBy = 'first_air_date';
+    let sortOrder = 'desc';
+    
+    if (activeCategory === 'Popular') {
+      sortBy = 'vote_average';
+      sortOrder = 'desc';
+    } else if (activeCategory === 'Featured') {
+      sortBy = 'vote_average';
+      sortOrder = 'desc';
+    } else if (activeCategory === 'Classic Shows') {
+      sortBy = 'first_air_date';
+      sortOrder = 'asc';
+    } else if (activeCategory === 'Trending') {
+      sortBy = 'first_air_date';
+      sortOrder = 'desc';
+    }
+    
+    // Fetch only 28 series for category (7 * 4 pages max)
+    fetch(`/api/tv-series-db?limit=28&sortBy=${sortBy}&sortOrder=${sortOrder}`)
       .then(res => res.json())
       .then(result => {
         if (result.success && result.data) {
@@ -40,29 +64,24 @@ function TVSeriesDisplay({ activeCategory, categoryConfig }: { activeCategory: s
             numberOfSeasons: data.number_of_seasons || data.seasons?.length || 0
           }));
           
-          setAllStaticSeries(seriesData);
+          setCategorySeries(seriesData);
+          setLoadedCategories(prev => new Set([...prev, activeCategory]));
         }
         setLoading(false);
       })
       .catch(error => {
-      console.error('Error loading TV series data:', error);
-      setLoading(false);
-    });
-  }, []); // Load only once when component mounts
+        console.error('Error loading TV series data:', error);
+        setLoading(false);
+      });
+  }, [activeCategory, loadedCategories]);
   
   // Reset display count when category changes
   useEffect(() => {
     setDisplayCount(7);
   }, [activeCategory]);
   
-  // Find current category config
-  const currentCategory = categoryConfig.find(cat => cat.name === activeCategory);
-  const startIndex = currentCategory?.startIndex || 0;
-  const maxCount = currentCategory?.count || 100;
-  
-  // Get series for current category
-  const categorySeriesData = allStaticSeries.slice(startIndex, startIndex + maxCount);
-  const displaySeries = categorySeriesData.slice(0, displayCount);
+  // Get series for current category (from loaded data)
+  const displaySeries = categorySeries.slice(0, displayCount);
 
   if (loading) {
     return (
@@ -77,7 +96,7 @@ function TVSeriesDisplay({ activeCategory, categoryConfig }: { activeCategory: s
     );
   }
 
-  if (categorySeriesData.length === 0) {
+  if (categorySeries.length === 0 && !loading) {
     return (
       <div className="text-center py-16">
         <div className="text-6xl mb-4">📺</div>
@@ -153,13 +172,13 @@ function TVSeriesDisplay({ activeCategory, categoryConfig }: { activeCategory: s
       </div>
       
       {/* Load More Button */}
-      {displayCount < categorySeriesData.length && (
+      {displayCount < categorySeries.length && (
         <div className="text-center mt-6">
           <button
-            onClick={() => setDisplayCount(prev => Math.min(prev + 7, categorySeriesData.length))}
+            onClick={() => setDisplayCount(prev => Math.min(prev + 7, categorySeries.length))}
             className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
           >
-            Load More ({categorySeriesData.length - displayCount} remaining)
+            Load More ({categorySeries.length - displayCount} remaining)
           </button>
         </div>
       )}
