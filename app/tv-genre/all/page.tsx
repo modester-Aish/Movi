@@ -1,7 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import { getTVImageUrl } from "@/api/tmdb-tv";
-import { getAllStaticSeries } from "@/data/tvSeriesStatic";
 import { TV_SERIES_IDS } from "@/data/tvSeriesIds";
 import type { Metadata } from 'next';
 
@@ -96,7 +95,7 @@ export default async function AllTVSeriesPage() {
           {allSeries.map((series) => (
             <Link
               key={series.series_tmdb_id}
-              href={`/series/${createSeriesSlug(series.series_name, series.imdb_id || '')}`}
+              href={`/series/${createSeriesSlug(series.series_name, series.series_tmdb_id)}`}
               className="group"
             >
               <div className="bg-gray-800 rounded-lg overflow-hidden hover:ring-2 hover:ring-purple-500 transition-all duration-200">

@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { getTVImageUrl } from "@/api/tmdb-tv";
-// REMOVED: import { TV_SERIES_STATIC } from "@/data/tvSeriesStatic"; // 61MB - Now lazy loaded
+import { TV_SERIES_STATIC } from "@/data/tvSeriesStatic";
 
 interface SeriesWithEpisodeCount {
   imdb_id: string;

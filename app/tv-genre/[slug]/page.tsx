@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { getTVImageUrl } from "@/api/tmdb-tv";
-// REMOVED: import { TV_SERIES_STATIC } from "@/data/tvSeriesStatic"; // 61MB - Now lazy loaded
+import { TV_SERIES_STATIC } from "@/data/tvSeriesStatic";
 import { getTVGenreBySlug } from "@/data/tvGenres";
 
 // Helper function to create series slug

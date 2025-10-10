@@ -374,7 +374,7 @@ export default async function EpisodePlayerPage({ params }: EpisodePageProps) {
                     <div className="relative w-24 h-16 sm:w-32 sm:h-20 rounded overflow-hidden flex-shrink-0 bg-gray-200">
                       {otherEp.still_path ? (
                         <Image
-                          src={getTVImageUrl(otherEp.still_path, 'w300')}
+                          src={getTVImageUrl(otherEp.still_path, 'w342')}
                           alt={`Episode ${otherEp.episode_number}`}
                           fill
                           className="object-cover group-hover:scale-105 transition-transform duration-200"
