@@ -72,7 +72,7 @@ export default async function AllTVSeriesPage() {
     if (!b.last_air_date) return -1;
     return new Date(b.last_air_date).getTime() - new Date(a.last_air_date).getTime();
   });
-  const totalSeries = TV_SERIES_IDS.length;
+  // totalSeries already defined above on line 24
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
