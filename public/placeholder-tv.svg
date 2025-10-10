@@ -1,0 +1,9 @@
+<svg width="500" height="750" viewBox="0 0 500 750" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="500" height="750" fill="#374151"/>
+<rect x="50" y="50" width="400" height="650" fill="#4B5563"/>
+<svg x="150" y="250" width="200" height="250" viewBox="0 0 24 24" fill="#9CA3AF">
+<path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5l-1 1v1h8v-1l-1-1h5c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 12H3V5h18v10z"/>
+<path d="M10 8v8l5-4-5-4z"/>
+</svg>
+<text x="250" y="600" font-family="Arial" font-size="24" fill="#9CA3AF" text-anchor="middle">No Image</text>
+</svg>

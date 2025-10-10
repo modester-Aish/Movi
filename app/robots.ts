@@ -10,7 +10,6 @@ export default function robots(): MetadataRoute.Robots {
         allow: '/',
         disallow: [
           '/admin/',
-          '/api/',
           '/test-*/',
           '/_next/',
           '/private/',
@@ -21,12 +20,14 @@ export default function robots(): MetadataRoute.Robots {
         allow: '/',
         disallow: [
           '/admin/',
-          '/api/',
           '/test-*/',
         ],
       },
     ],
-    sitemap: `${baseUrl}/sitemap.xml`,
+    sitemap: [
+      `${baseUrl}/sitemap.xml`,
+      `${baseUrl}/api/sitemap-index.xml`,
+    ],
     host: baseUrl,
   };
 }

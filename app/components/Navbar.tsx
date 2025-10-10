@@ -10,69 +10,66 @@ export default function Navbar() {
   const [years, setYears] = useState<number[]>([]);
   const [decades, setDecades] = useState<Array<{decade: string, years: number[]}>>([]);
   const [progress, setProgress] = useState({processedMovies: 0, totalMovies: 95942, foundMovies: 0});
-  const [isLoadingYears, setIsLoadingYears] = useState(true);
+  const [isLoadingYears, setIsLoadingYears] = useState(false);
+  const [yearsLoaded, setYearsLoaded] = useState(false); // Track if years have been loaded
 
-  // Fetch years data from API
-  useEffect(() => {
-    const fetchYears = async () => {
-      try {
-        const response = await fetch('/api/years');
-        const data = await response.json();
+  // Fetch years data from API - ONLY when user hovers over dropdown
+  const fetchYears = async () => {
+    if (yearsLoaded) return; // Don't fetch if already loaded
+    
+    setIsLoadingYears(true);
+    try {
+      const response = await fetch('/api/years');
+      const data = await response.json();
+      
+      if (data.years) {
+        setYears(data.years);
         
-        if (data.years) {
-          setYears(data.years);
-          
-          // Process decades to move 2026 and 2027 into 2025 decade
-          const processedDecades = (data.decades || []).map((decadeData: {decade: string, years: number[]}) => {
-            if (decadeData.decade === "2020s") {
-              // Move 2026 and 2027 to 2025 decade if they exist
-              const years2025 = decadeData.years.filter(year => year <= 2025);
-              const years2026_2027 = decadeData.years.filter(year => year === 2026 || year === 2027);
-              
-              return {
-                ...decadeData,
-                years: years2025
-              };
-            } else if (decadeData.decade === "2025s") {
-              // Add 2026 and 2027 to 2025 decade
-              const allYears = [...decadeData.years];
-              const originalDecades = data.decades || [];
-              const decade2020s = originalDecades.find((d: {decade: string, years: number[]}) => d.decade === "2020s");
-              if (decade2020s) {
-                const years2026_2027 = decade2020s.years.filter((year: number) => year === 2026 || year === 2027);
-                allYears.push(...years2026_2027);
-              }
-              return {
-                ...decadeData,
-                years: allYears.sort((a, b) => b - a)
-              };
+        // Process decades to move 2026 and 2027 into 2025 decade
+        const processedDecades = (data.decades || []).map((decadeData: {decade: string, years: number[]}) => {
+          if (decadeData.decade === "2020s") {
+            // Move 2026 and 2027 to 2025 decade if they exist
+            const years2025 = decadeData.years.filter(year => year <= 2025);
+            const years2026_2027 = decadeData.years.filter(year => year === 2026 || year === 2027);
+            
+            return {
+              ...decadeData,
+              years: years2025
+            };
+          } else if (decadeData.decade === "2025s") {
+            // Add 2026 and 2027 to 2025 decade
+            const allYears = [...decadeData.years];
+            const originalDecades = data.decades || [];
+            const decade2020s = originalDecades.find((d: {decade: string, years: number[]}) => d.decade === "2020s");
+            if (decade2020s) {
+              const years2026_2027 = decade2020s.years.filter((year: number) => year === 2026 || year === 2027);
+              allYears.push(...years2026_2027);
             }
-            return decadeData;
-          });
-          
-          setDecades(processedDecades);
-          setProgress({
-            processedMovies: data.processedMovies || 0,
-            totalMovies: data.totalMovies || 95942,
-            foundMovies: data.foundMovies || 0
-          });
-        }
-      } catch (error) {
-        console.error('Error fetching years:', error);
-        // Fallback to static years if API fails
-        setYears([2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010, 2009, 2008, 2007, 2006, 2005, 2004, 2003, 2002, 2001, 2000]);
-      } finally {
-        setIsLoadingYears(false);
+            return {
+              ...decadeData,
+              years: allYears.sort((a, b) => b - a)
+            };
+          }
+          return decadeData;
+        });
+        
+        setDecades(processedDecades);
+        setProgress({
+          processedMovies: data.processedMovies || 0,
+          totalMovies: data.totalMovies || 95942,
+          foundMovies: data.foundMovies || 0
+        });
+        setYearsLoaded(true); // Mark as loaded
       }
-    };
-
-    fetchYears();
-    
-    // Auto-refresh every 30 seconds to get new years as they're processed
-    const interval = setInterval(fetchYears, 30000);
-    
-    return () => clearInterval(interval);
-  }, []);
+    } catch (error) {
+      console.error('Error fetching years:', error);
+      // Fallback to static years if API fails
+      setYears([2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010, 2009, 2008, 2007, 2006, 2005, 2004, 2003, 2002, 2001, 2000]);
+      setYearsLoaded(true);
+    } finally {
+      setIsLoadingYears(false);
+    }
+  };
 
   return (
     <nav className="bg-black/50 backdrop-blur-sm border-b border-gray-700 sticky top-0 z-30">
@@ -96,9 +93,15 @@ export default function Navbar() {
           
           {/* Navigation - Center */}
           <div className="hidden md:flex items-center space-x-6">
-            <Link href="/home" className="text-white hover:text-red-400 transition-colors font-medium">
+            <Link 
+              href="/home" 
+              className="text-white hover:text-red-400 transition-colors font-medium"
+              onClick={() => {
+                localStorage.setItem('homepageMode', 'movies');
+              }}
+            >
               HOME
-              </Link>
+            </Link>
             
             {/* Genres Dropdown */}
             <div className="relative group">
@@ -234,9 +237,12 @@ export default function Navbar() {
               </div>
             </div>
 
-            {/* Years Dropdown - Dynamic */}
+            {/* Years Dropdown - Dynamic (Load on hover) */}
             <div className="relative group">
-              <button className="text-gray-300 hover:text-white transition-colors flex items-center">
+              <button 
+                className="text-gray-300 hover:text-white transition-colors flex items-center"
+                onMouseEnter={fetchYears}
+              >
                 YEARS
                 <svg className="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -245,7 +251,10 @@ export default function Navbar() {
                   <div className="ml-2 w-3 h-3 border border-gray-400 border-t-transparent rounded-full animate-spin"></div>
                 )}
               </button>
-              <div className="absolute top-full left-0 mt-2 w-96 bg-gray-800 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+              <div 
+                className="absolute top-full left-0 mt-2 w-96 bg-gray-800 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50"
+                onMouseEnter={fetchYears}
+              >
                 <div className="p-4">
                   
                   {/* Years organized by decades */}
@@ -286,9 +295,6 @@ export default function Navbar() {
               </div>
             </div>
 
-            <Link href="/movies" className="text-gray-300 hover:text-white transition-colors">
-              MOVIES
-            </Link>
           </div>
 
           {/* Search Bar - Right (Hidden on mobile) */}
@@ -332,16 +338,12 @@ export default function Navbar() {
             <Link 
               href="/home" 
               className="text-white hover:text-red-400 block px-3 py-2 rounded-md text-base font-medium transition-colors"
-              onClick={() => setIsMenuOpen(false)}
+              onClick={() => {
+                setIsMenuOpen(false);
+                localStorage.setItem('homepageMode', 'movies');
+              }}
             >
               Home
-            </Link>
-            <Link 
-              href="/movies" 
-              className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Movies
             </Link>
             <Link 
               href="/genres" 
