@@ -24,9 +24,9 @@ async function migrateTVSeries() {
     const db = client.db(DB_NAME);
     const collection = db.collection(COLLECTION_NAME);
 
-    // Import the static data
+    // Import the static data (using dynamic import for TypeScript support)
     console.log('📥 Loading TV Series static data...');
-    const { TV_SERIES_STATIC } = require('../app/data/tvSeriesStatic.ts');
+    const { TV_SERIES_STATIC } = await import('../app/data/tvSeriesStatic.ts');
     
     // Convert object to array of documents
     const seriesArray = Object.entries(TV_SERIES_STATIC).map(([imdbId, data]) => ({
