@@ -4,7 +4,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { getTVImageUrl } from "@/api/tmdb-tv";
-import { TV_SERIES_STATIC } from "@/data/tvSeriesStatic";
 
 interface SeriesWithEpisodeCount {
   imdb_id: string;
@@ -16,6 +15,7 @@ interface SeriesWithEpisodeCount {
   first_air_date?: string;
   vote_average?: number;
   number_of_seasons?: number;
+  seasons?: any[];
   episodeCount: number;
 }
 
@@ -30,33 +30,42 @@ function createSeriesSlug(name: string, id: string | number): string {
 
 export default function SeriesListPage() {
   const [displayCount, setDisplayCount] = useState(7);
+  const [allSeriesData, setAllSeriesData] = useState<SeriesWithEpisodeCount[]>([]);
+  const [loading, setLoading] = useState(true);
   
-  // Set page title
+  // Fetch series from MongoDB API
   useEffect(() => {
+    async function fetchSeries() {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/tv-series-db?limit=10000&sortBy=first_air_date&sortOrder=desc');
+        const result = await response.json();
+        
+        if (result.success && result.data) {
+          const seriesWithCount = result.data.map((series: any) => ({
+            imdb_id: series.imdb_id,
+            tmdb_id: series.tmdb_id,
+            name: series.name || `TV Series ${series.imdb_id}`,
+            overview: series.overview,
+            poster_path: series.poster_path,
+            backdrop_path: series.backdrop_path,
+            first_air_date: series.first_air_date,
+            vote_average: series.vote_average || 0,
+            number_of_seasons: series.number_of_seasons || series.seasons?.length || 0,
+            episodeCount: series.seasons?.reduce((sum: number, season: any) => sum + season.episodes.length, 0) || 0
+          }));
+          setAllSeriesData(seriesWithCount);
+        }
+      } catch (error) {
+        console.error('Error fetching series:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    fetchSeries();
     document.title = 'TV Series - Watch TV Shows Online';
   }, []);
-  
-  // Get series from static data - sorted by newest first
-  const allSeriesData = Object.entries(TV_SERIES_STATIC)
-    .filter(([_, data]) => data.name) // Only series with names (from TMDB)
-    .sort((a, b) => {
-      // Sort by first_air_date (newest first)
-      const dateA = a[1].first_air_date ? new Date(a[1].first_air_date).getTime() : 0;
-      const dateB = b[1].first_air_date ? new Date(b[1].first_air_date).getTime() : 0;
-      return dateB - dateA; // Newest first
-    })
-    .map(([imdbId, data]) => ({
-      imdb_id: imdbId,
-      tmdb_id: data.tmdb_id,
-      name: data.name || `TV Series ${imdbId}`,
-      overview: data.overview,
-      poster_path: data.poster_path,
-      backdrop_path: data.backdrop_path,
-      first_air_date: data.first_air_date,
-      vote_average: data.vote_average || 0,
-      number_of_seasons: data.number_of_seasons || data.seasons?.length || 0,
-      episodeCount: data.seasons?.reduce((sum, season) => sum + season.episodes.length, 0) || 0
-    }));
   
   const allSeries = allSeriesData.slice(0, displayCount); // Show only displayCount series
 
@@ -66,12 +75,20 @@ export default function SeriesListPage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-white mb-2">TV Series</h1>
-          <p className="text-gray-400">Browse {allSeriesData.length.toLocaleString()} TV shows with {allSeriesData.reduce((sum, s) => sum + s.episodeCount, 0).toLocaleString()} episodes</p>
+          <p className="text-gray-400">
+            {loading ? 'Loading...' : `Browse ${allSeriesData.length.toLocaleString()} TV shows with ${allSeriesData.reduce((sum, s) => sum + s.episodeCount, 0).toLocaleString()} episodes`}
+          </p>
           <p className="text-purple-400 text-sm mt-1">📺 New releases first • Load 7 at a time for fast performance</p>
         </div>
 
-        {/* Series Grid */}
-        {allSeries.length === 0 ? (
+        {/* Loading State */}
+        {loading ? (
+          <div className="text-center py-16">
+            <div className="text-6xl mb-4 animate-pulse">📺</div>
+            <h2 className="text-2xl font-bold text-white mb-2">Loading TV Series...</h2>
+            <p className="text-gray-400">Please wait</p>
+          </div>
+        ) : allSeries.length === 0 ? (
           <div className="text-center py-16">
             <div className="text-6xl mb-4">📺</div>
             <h2 className="text-2xl font-bold text-white mb-2">No TV Series Available</h2>

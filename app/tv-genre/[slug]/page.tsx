@@ -5,7 +5,6 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { getTVImageUrl } from "@/api/tmdb-tv";
-import { TV_SERIES_STATIC } from "@/data/tvSeriesStatic";
 import { getTVGenreBySlug } from "@/data/tvGenres";
 
 // Helper function to create series slug
@@ -21,11 +20,43 @@ export default function TVGenrePage() {
   const params = useParams();
   const slug = params.slug as string;
   const [displayCount, setDisplayCount] = useState(7);
+  const [allSeriesData, setAllSeriesData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   
   const genre = getTVGenreBySlug(slug);
   
-  // Set page title
+  // Fetch series from MongoDB API
   useEffect(() => {
+    async function fetchSeries() {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/tv-series-db?limit=10000&sortBy=first_air_date&sortOrder=desc');
+        const result = await response.json();
+        
+        if (result.success && result.data) {
+          const seriesWithCount = result.data.map((series: any) => ({
+            imdb_id: series.imdb_id,
+            tmdb_id: series.tmdb_id,
+            name: series.name || `TV Series ${series.imdb_id}`,
+            overview: series.overview,
+            poster_path: series.poster_path,
+            backdrop_path: series.backdrop_path,
+            first_air_date: series.first_air_date,
+            vote_average: series.vote_average || 0,
+            number_of_seasons: series.number_of_seasons || series.seasons?.length || 0,
+            episodeCount: series.seasons?.reduce((sum: number, season: any) => sum + season.episodes.length, 0) || 0
+          }));
+          setAllSeriesData(seriesWithCount);
+        }
+      } catch (error) {
+        console.error('Error fetching series:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    fetchSeries();
+    
     if (genre) {
       document.title = `${genre.name} TV Shows - Watch Online`;
     }
@@ -46,28 +77,6 @@ export default function TVGenrePage() {
       </div>
     );
   }
-
-  // Get all series from static data - sorted by newest first
-  const allSeriesData = Object.entries(TV_SERIES_STATIC)
-    .filter(([_, data]) => data.name) // Only series with names
-    .sort((a, b) => {
-      // Sort by first_air_date (newest first)
-      const dateA = a[1].first_air_date ? new Date(a[1].first_air_date).getTime() : 0;
-      const dateB = b[1].first_air_date ? new Date(b[1].first_air_date).getTime() : 0;
-      return dateB - dateA;
-    })
-    .map(([imdbId, data]) => ({
-      imdb_id: imdbId,
-      tmdb_id: data.tmdb_id,
-      name: data.name || `TV Series ${imdbId}`,
-      poster_path: data.poster_path,
-      backdrop_path: data.backdrop_path,
-      overview: data.overview,
-      first_air_date: data.first_air_date,
-      vote_average: data.vote_average || 0,
-      number_of_seasons: data.number_of_seasons || data.seasons?.length || 0,
-      episodeCount: data.seasons?.reduce((sum, season) => sum + season.episodes.length, 0) || 0
-    }));
   
   const seriesInGenre = allSeriesData.slice(0, displayCount);
 

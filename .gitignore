@@ -44,3 +44,6 @@ next-env.d.ts
 *.zip
 movies.zip
 node_modules.zip
+
+# Large static data files (moved to MongoDB)
+app/data/tvSeriesStatic.ts
