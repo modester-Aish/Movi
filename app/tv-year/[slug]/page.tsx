@@ -54,7 +54,7 @@ export default function TVYearPage() {
       first_air_date: data.first_air_date,
       vote_average: data.vote_average || 0,
       number_of_seasons: data.number_of_seasons || data.seasons?.length || 0,
-      episodeCount: data.seasons?.reduce((sum, season) => sum + season.episodes.length, 0) || 0
+      episodeCount: data.seasons?.reduce((sum: number, season: any) => sum + season.episodes.length, 0) || 0
           }));
           
           setAllSeriesData(seriesData);
