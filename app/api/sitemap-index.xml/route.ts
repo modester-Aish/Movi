@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
+import clientPromise from '@/lib/mongodb-client';
 
 const DOMAIN = 'https://ww1.n123movie.me';
-const MOVIES_PER_SITEMAP = 10000;
+const ITEMS_PER_SITEMAP = 1000; // 1k per sitemap
 
 export async function GET() {
   try {
@@ -9,9 +10,24 @@ export async function GET() {
     const { BULK_MOVIE_IDS } = await import('@/data/bulkMovieIds');
     
     const totalMovies = BULK_MOVIE_IDS.length;
-    const numberOfMovieSitemaps = Math.ceil(totalMovies / MOVIES_PER_SITEMAP);
+    const numberOfMovieSitemaps = Math.ceil(totalMovies / ITEMS_PER_SITEMAP);
+    
+    // Get total series count from MongoDB
+    let totalSeries = 0;
+    let numberOfSeriesSitemaps = 0;
+    
+    try {
+      const client = await clientPromise;
+      const db = client.db('moviesDB');
+      const seriesCollection = db.collection('tvSeries');
+      totalSeries = await seriesCollection.countDocuments();
+      numberOfSeriesSitemaps = Math.ceil(totalSeries / ITEMS_PER_SITEMAP);
+    } catch (error) {
+      console.error('Error fetching series count:', error);
+    }
     
     console.log(`Total movies: ${totalMovies}, Number of movie sitemaps: ${numberOfMovieSitemaps}`);
+    console.log(`Total series: ${totalSeries}, Number of series sitemaps: ${numberOfSeriesSitemaps}`);
     
     const lastmod = new Date().toISOString();
     
@@ -36,6 +52,10 @@ export async function GET() {
   </sitemap>
 ${Array.from({ length: numberOfMovieSitemaps }, (_, i) => `  <sitemap>
     <loc>${DOMAIN}/api/sitemap-movies/${i + 1}</loc>
+    <lastmod>${lastmod}</lastmod>
+  </sitemap>`).join('\n')}
+${Array.from({ length: numberOfSeriesSitemaps }, (_, i) => `  <sitemap>
+    <loc>${DOMAIN}/api/sitemap-series/${i + 1}</loc>
     <lastmod>${lastmod}</lastmod>
   </sitemap>`).join('\n')}
 </sitemapindex>`;
