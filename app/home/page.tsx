@@ -243,7 +243,7 @@ function TVSeriesDisplay({ activeCategory, categoryConfig }: { activeCategory: s
         {displaySeries.map((series) => (
           <Link
             key={series.imdbId}
-            href={`/series/${series.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')}-${series.tmdbId || series.imdbId}`}
+            href={`/${series.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')}-${series.tmdbId || series.imdbId}`}
             className="group"
           >
             <div className="bg-gray-800 rounded-lg overflow-hidden hover:ring-2 hover:ring-purple-500 transition-all duration-200">

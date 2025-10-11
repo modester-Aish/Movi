@@ -121,7 +121,7 @@ export default function SeriesListPage() {
               {allSeries.map((series) => (
                 <Link
                   key={series.imdb_id}
-                  href={`/series/${createSeriesSlug(series.name, series.tmdb_id || series.imdb_id)}`}
+                  href={`/${createSeriesSlug(series.name, series.tmdb_id || series.imdb_id)}`}
                   className="group"
                 >
                   <div className="bg-gray-800 rounded-lg overflow-hidden hover:ring-2 hover:ring-purple-500 transition-all duration-200">

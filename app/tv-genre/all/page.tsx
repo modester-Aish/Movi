@@ -95,7 +95,7 @@ export default async function AllTVSeriesPage() {
           {allSeries.map((series) => (
             <Link
               key={series.series_tmdb_id}
-              href={`/series/${createSeriesSlug(series.series_name, series.series_tmdb_id)}`}
+              href={`/${createSeriesSlug(series.series_name, series.series_tmdb_id)}`}
               className="group"
             >
               <div className="bg-gray-800 rounded-lg overflow-hidden hover:ring-2 hover:ring-purple-500 transition-all duration-200">

@@ -101,7 +101,7 @@ export default async function EpisodePage({
                         className="rounded-lg w-full h-auto"
                       />
                       <Link 
-                        href={`/series/${seriesSlug}/season-${episode.season_number}`}
+                        href={`/${seriesSlug}/season-${episode.season_number}`}
                         className="w-full mt-4 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg font-medium text-center block transition-colors"
                       >
                         Back to Season
@@ -215,7 +215,7 @@ export default async function EpisodePage({
               <div className="bg-white p-4 rounded-lg shadow-sm">
                 <h3 className="text-lg font-bold text-black mb-4">Related Episodes</h3>
                 <div className="space-y-3">
-                  <Link href={`/series/${seriesSlug}/season-${episode.season_number}`} className="flex gap-3 hover:bg-gray-50 p-2 rounded transition-colors">
+                  <Link href={`/${seriesSlug}/season-${episode.season_number}`} className="flex gap-3 hover:bg-gray-50 p-2 rounded transition-colors">
                     <div className="w-16 h-20 rounded flex-shrink-0 overflow-hidden">
                       <Image
                         src={series?.poster_path ? `https://image.tmdb.org/t/p/w300${series.poster_path}` : '/placeholder.svg'}
@@ -231,7 +231,7 @@ export default async function EpisodePage({
                     </div>
                   </Link>
                   {series && (
-                    <Link href={`/series/${seriesSlug}`} className="flex gap-3 hover:bg-gray-50 p-2 rounded transition-colors">
+                    <Link href={`/${seriesSlug}`} className="flex gap-3 hover:bg-gray-50 p-2 rounded transition-colors">
                       <div className="w-16 h-20 rounded flex-shrink-0 overflow-hidden">
                         <Image
                           src={series.poster_path ? `https://image.tmdb.org/t/p/w300${series.poster_path}` : '/placeholder.svg'}

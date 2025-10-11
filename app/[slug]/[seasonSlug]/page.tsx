@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { getTVImageUrl } from "@/api/tmdb-tv";
-// REMOVED: import { TV_SERIES_STATIC } from "@/data/tvSeriesStatic"; // 61MB - Now lazy loaded
+import { getBaseUrlForBuild } from "@/lib/domain";
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { cache } from 'react';
@@ -62,9 +62,19 @@ export async function generateMetadata({ params }: SeasonPageProps): Promise<Met
   try {
     const series = await getTMDBSeries(tmdbId);
     if (series) {
+      const baseUrl = getBaseUrlForBuild();
       return {
         title: `${series.name} - Season ${seasonNumber} - Watch All Episodes`,
         description: `Watch all episodes of ${series.name} Season ${seasonNumber} online.`,
+        alternates: {
+          canonical: `${baseUrl}/${slug}/${seasonSlug}`,
+        },
+        openGraph: {
+          title: `${series.name} - Season ${seasonNumber} - Watch All Episodes`,
+          description: `Watch all episodes of ${series.name} Season ${seasonNumber} online.`,
+          url: `${baseUrl}/${slug}/${seasonSlug}`,
+          type: 'video.tv_show',
+        },
       };
     }
   } catch (error) {
@@ -158,7 +168,7 @@ export default async function SeasonPage({ params }: SeasonPageProps) {
           <ol className="flex items-center space-x-2 text-gray-400">
             <li><Link href="/series" className="hover:text-purple-400">TV Series</Link></li>
             <li>›</li>
-            <li><Link href={`/series/${slug}`} className="hover:text-purple-400">{series.name}</Link></li>
+            <li><Link href={`/${slug}`} className="hover:text-purple-400">{series.name}</Link></li>
             <li>›</li>
             <li className="text-white">Season {seasonNumber}</li>
           </ol>
