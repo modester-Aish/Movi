@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import Link from "next/link";
 import Image from "next/image";
 import clientPromise from '@/lib/mongodb-client';
+import { getBaseUrlForBuild } from '@/lib/domain';
 
 // Helper function to extract episode ID from slug
 function extractEpisodeIdFromSlug(slug: string): string | null {
@@ -289,9 +290,28 @@ export async function generateMetadata({
     
     const series = await seriesCollection.findOne({ imdb_id: episode.series_imdb_id });
     
+    const baseUrl = getBaseUrlForBuild();
+    const episodeTitle = `${episode.episode_name} - ${series?.name || 'TV Series'} S${episode.season_number}E${episode.episode_number}`;
+    const episodeDescription = episode.overview || `Watch ${episode.episode_name} from ${series?.name || 'TV Series'} Season ${episode.season_number}.`;
+    
     return {
-      title: `${episode.episode_name} - ${series?.name || 'TV Series'} S${episode.season_number}E${episode.episode_number}`,
-      description: episode.overview || `Watch ${episode.episode_name} from ${series?.name || 'TV Series'} Season ${episode.season_number}.`,
+      title: episodeTitle,
+      description: episodeDescription,
+      alternates: {
+        canonical: `${baseUrl}/episode/${slug}`,
+      },
+      openGraph: {
+        title: episodeTitle,
+        description: episodeDescription,
+        url: `${baseUrl}/episode/${slug}`,
+        type: 'video.episode',
+        siteName: 'movies123',
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: episodeTitle,
+        description: episodeDescription,
+      },
     };
   } catch (error) {
     return {
