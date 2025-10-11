@@ -94,17 +94,8 @@ export default async function SeriesDetailPage({ params }: SeriesPageProps) {
   // TV_SERIES_STATIC removed - using MongoDB API instead
   const staticData = null;
   
-  // Get seasons from static data or use default from TMDB
-  const seasons: SeasonData[] = staticData?.seasons?.map(season => ({
-    season_number: season.season_number,
-    episodeCount: season.episodes.length,
-    episodes: season.episodes.map(ep => ({
-      episode_imdb_id: ep.episode_imdb_id,
-      episode_number: ep.episode_number,
-      episode_name: ep.episode_name || `Episode ${ep.episode_number}`,
-      still_path: undefined
-    }))
-  })) || [];
+  // Static data removed - using TMDB data only
+  const seasons: SeasonData[] = [];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">

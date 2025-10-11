@@ -105,18 +105,8 @@ export default async function SeasonPage({ params }: SeasonPageProps) {
   // TV_SERIES_STATIC removed - using MongoDB API instead
   const staticData = null;
   
-  // Get episodes for this season from static data
-  const seasonData = staticData?.seasons?.find(s => s.season_number === seasonNumber);
-  const episodes: EpisodeData[] = seasonData?.episodes.map(ep => ({
-    episode_imdb_id: ep.episode_imdb_id,
-    episode_number: ep.episode_number,
-    episode_name: ep.episode_name || `Episode ${ep.episode_number}`,
-    still_path: undefined,
-    overview: undefined,
-    air_date: undefined,
-    vote_average: undefined,
-    runtime: undefined
-  })) || [];
+  // Static data removed - using TMDB data only
+  const episodes: EpisodeData[] = [];
   
   if (episodes.length === 0) {
     notFound();

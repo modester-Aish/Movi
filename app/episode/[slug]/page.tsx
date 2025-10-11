@@ -105,56 +105,9 @@ export default async function EpisodePlayerPage({ params }: EpisodePageProps) {
     notFound();
   }
   
-  // Find episode in static data (cached with dynamic import)
-  const result = await findEpisodeInStatic(episodeId);
-  
-  if (!result) {
-    notFound();
-  }
-  
-  const { seriesImdbId, seriesData, season, episode: ep } = result;
-  const seasonNumber = season.season_number;
-  
-  const episode: EpisodeData = {
-    episode_imdb_id: ep.episode_imdb_id,
-    tmdb_episode_id: 0,
-    series_tmdb_id: seriesData.tmdb_id || 0,
-    series_imdb_id: seriesImdbId,
-    series_name: seriesData.name || 'TV Series',
-    season_number: season.season_number,
-    episode_number: ep.episode_number,
-    episode_name: ep.episode_name || `Episode ${ep.episode_number}`,
-    overview: undefined,
-    still_path: undefined,
-    air_date: undefined,
-    vote_average: undefined,
-    runtime: undefined
-  };
-  
-  // Get series details from TMDB (cached)
-  const series = await getTMDBSeries(episode.series_tmdb_id);
-  
-  // Get other episodes from the same season (limit to 10 for performance)
-  const otherEpisodes: OtherEpisode[] = season.episodes
-    .filter(e => e.episode_number !== episode.episode_number)
-    .slice(0, 10)
-    .map(e => ({
-      episode_imdb_id: e.episode_imdb_id,
-      episode_number: e.episode_number,
-      episode_name: e.episode_name || `Episode ${e.episode_number}`,
-      still_path: series?.poster_path // Use series poster as fallback
-    }));
-
-  // Helper function to create episode slug
-  function createEpisodeSlug(episodeNumber: number, episodeName: string, episodeImdbId: string): string {
-    const nameSlug = episodeName
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '');
-    const s = episode.season_number.toString().padStart(2, '0');
-    const e = episodeNumber.toString().padStart(2, '0');
-    return `${nameSlug}-s${s}e${e}-${episodeImdbId}`;
-  }
+  // Static data lookup removed - episode pages will use MongoDB API
+  // For now, return 404 until MongoDB episode API is implemented
+  notFound(); // Temporary - will implement MongoDB episode lookup later
 
   return (
     <div className="min-h-screen bg-white">
