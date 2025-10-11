@@ -177,7 +177,7 @@ export default async function SeriesDetailPage({ params }: SeriesPageProps) {
                 </div>
                 <div>
                   <span className="text-gray-400">Episodes:</span>
-                  <span className="text-white ml-2 font-semibold">{series.number_of_episodes || seasons.reduce((sum, s) => sum + s.episodeCount, 0)}</span>
+                  <span className="text-white ml-2 font-semibold">{series.number_of_episodes || seasons.reduce((sum: number, s: any) => sum + s.episodeCount, 0)}</span>
                 </div>
               </div>
             </div>
