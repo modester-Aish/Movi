@@ -91,10 +91,8 @@ export default async function SeriesDetailPage({ params }: SeriesPageProps) {
     notFound();
   }
   
-  // Find series in static data by TMDB ID (dynamic import for performance)
-  const { TV_SERIES_STATIC } = await import('@/data/tvSeriesStatic');
-  const imdbId = Object.keys(TV_SERIES_STATIC).find(id => TV_SERIES_STATIC[id].tmdb_id === tmdbId);
-  const staticData = imdbId ? TV_SERIES_STATIC[imdbId] : null;
+  // TV_SERIES_STATIC removed - using MongoDB API instead
+  const staticData = null;
   
   // Get seasons from static data or use default from TMDB
   const seasons: SeasonData[] = staticData?.seasons?.map(season => ({

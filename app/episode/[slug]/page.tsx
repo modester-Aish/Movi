@@ -29,20 +29,7 @@ const getTMDBSeries = cache(async (tmdbId: number) => {
 
 // Cache episode lookup for better performance (with dynamic import)
 const findEpisodeInStatic = cache(async (episodeId: string) => {
-  const { TV_SERIES_STATIC } = await import('@/data/tvSeriesStatic');
-  for (const [seriesImdbId, seriesData] of Object.entries(TV_SERIES_STATIC)) {
-    for (const season of seriesData.seasons || []) {
-      const episode = season.episodes.find(ep => ep.episode_imdb_id === episodeId);
-      if (episode) {
-        return {
-          seriesImdbId,
-          seriesData,
-          season,
-          episode
-        };
-      }
-    }
-  }
+  // TV_SERIES_STATIC removed - using MongoDB API instead
   return null;
 });
 

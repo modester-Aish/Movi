@@ -102,10 +102,8 @@ export default async function SeasonPage({ params }: SeasonPageProps) {
     notFound();
   }
   
-  // Find series in static data by TMDB ID (dynamic import for performance)
-  const { TV_SERIES_STATIC } = await import('@/data/tvSeriesStatic');
-  const imdbId = Object.keys(TV_SERIES_STATIC).find(id => TV_SERIES_STATIC[id].tmdb_id === tmdbId);
-  const staticData = imdbId ? TV_SERIES_STATIC[imdbId] : null;
+  // TV_SERIES_STATIC removed - using MongoDB API instead
+  const staticData = null;
   
   // Get episodes for this season from static data
   const seasonData = staticData?.seasons?.find(s => s.season_number === seasonNumber);
