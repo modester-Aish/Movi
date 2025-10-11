@@ -65,16 +65,8 @@ export async function generateMetadata({ params }: EpisodePageProps): Promise<Me
     };
   }
   
-  // Find episode in static data (cached with dynamic import)
-  const result = await findEpisodeInStatic(episodeId);
-  if (result) {
-    const { seriesData, season, episode } = result;
-    const seriesName = seriesData.name || 'TV Series';
-    return {
-      title: `${seriesName} S${season.season_number}E${episode.episode_number} - ${episode.episode_name || 'Episode'}`,
-      description: `Watch ${seriesName} Season ${season.season_number} Episode ${episode.episode_number} online.`,
-    };
-  }
+  // Static data lookup removed - using MongoDB API instead
+  // Return default metadata for episode pages
   
   return {
     title: 'Episode Not Found',
