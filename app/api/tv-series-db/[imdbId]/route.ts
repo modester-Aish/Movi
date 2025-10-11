@@ -6,10 +6,10 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { imdbId: string } }
+  { params }: { params: Promise<{ imdbId: string }> }
 ) {
   try {
-    const { imdbId } = params;
+    const { imdbId } = await params;
 
     const client = await clientPromise;
     const db = client.db('moviesDB');
