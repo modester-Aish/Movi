@@ -79,6 +79,10 @@ export default function TVNavbar() {
               className="text-white hover:text-purple-400 transition-colors font-medium"
               onClick={() => {
                 localStorage.setItem('homepageMode', 'tv');
+                // Dispatch event to update navbar immediately
+                window.dispatchEvent(new CustomEvent('homepageModeChange', { 
+                  detail: { mode: 'tv' } 
+                }));
               }}
             >
               HOME
@@ -189,7 +193,7 @@ export default function TVNavbar() {
             <div className="relative">
               <input
                 type="text"
-                placeholder="Search TV series or movies"
+                placeholder="Search TV series"
                 className="bg-gray-800 text-white px-4 py-2 pl-10 pr-4 rounded-lg border border-gray-700 focus:outline-none focus:border-purple-500 w-64 cursor-pointer"
                 onClick={() => setIsSearchOpen(true)}
                 readOnly
@@ -228,6 +232,10 @@ export default function TVNavbar() {
               onClick={() => {
                 setIsMenuOpen(false);
                 localStorage.setItem('homepageMode', 'tv');
+                // Dispatch event to update navbar immediately
+                window.dispatchEvent(new CustomEvent('homepageModeChange', { 
+                  detail: { mode: 'tv' } 
+                }));
               }}
             >
               Home
@@ -255,7 +263,7 @@ export default function TVNavbar() {
                   }}
                   className="w-full bg-gray-800 text-gray-400 rounded-lg px-3 py-2 text-left hover:bg-gray-700 transition-all cursor-pointer"
                 >
-                  Search TV series or movies...
+                  Search TV series...
                 </button>
               </div>
             </div>
@@ -266,7 +274,8 @@ export default function TVNavbar() {
       {/* Search Modal */}
       <SearchModal 
         isOpen={isSearchOpen} 
-        onClose={() => setIsSearchOpen(false)} 
+        onClose={() => setIsSearchOpen(false)}
+        searchType="tv"
       />
     </nav>
   );

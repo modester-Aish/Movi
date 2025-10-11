@@ -107,7 +107,7 @@ export async function generateMetadata({ params }: MoviePageProps): Promise<Meta
   
   if (!imdbId) {
     return {
-      title: 'Movie Not Found - movies123',
+      title: 'Movie Not Found - 123Movies',
       description: 'The requested movie could not be found.',
     };
   }
@@ -116,7 +116,7 @@ export async function generateMetadata({ params }: MoviePageProps): Promise<Meta
     const movie = await getMovieByImdbId(imdbId);
     if (!movie) {
       return {
-        title: 'Movie Not Found - movies123',
+        title: 'Movie Not Found - 123Movies',
         description: 'The requested movie could not be found.',
       };
     }
@@ -126,7 +126,7 @@ export async function generateMetadata({ params }: MoviePageProps): Promise<Meta
   } catch (error) {
     console.error('Error generating metadata:', error);
     return {
-      title: 'Movie Not Found - movies123',
+      title: 'Movie Not Found - 123Movies',
       description: 'The requested movie could not be found.',
     };
   }
@@ -576,7 +576,7 @@ export default async function MoviePage({ params }: MoviePageProps) {
             {/* Filter Tabs */}
             <div className="flex flex-wrap items-center gap-2 text-sm">
               <button className="bg-gray-200 text-gray-800 px-3 py-1 rounded-full font-medium">All</button>
-              <button className="text-gray-600 px-3 py-1 rounded-full hover:bg-gray-100 transition-colors">From movies123</button>
+              <button className="text-gray-600 px-3 py-1 rounded-full hover:bg-gray-100 transition-colors">From 123Movies</button>
               <button className="text-gray-600 px-3 py-1 rounded-full hover:bg-gray-100 transition-colors">Related</button>
             </div>
 
@@ -606,7 +606,7 @@ export default async function MoviePage({ params }: MoviePageProps) {
                     <h4 className="text-gray-900 text-xs sm:text-sm font-medium line-clamp-2 group-hover:text-blue-600 transition-colors">
                       {similarMovie.title}
                     </h4>
-                    <p className="text-gray-600 text-xs mt-1">movies123</p>
+                    <p className="text-gray-600 text-xs mt-1">123Movies</p>
                     <p className="text-gray-500 text-xs">
                       {Math.floor(Math.random() * 1000) + 100}K views • {Math.floor(Math.random() * 30) + 1} days ago
                     </p>

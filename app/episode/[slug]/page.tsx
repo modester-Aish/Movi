@@ -305,7 +305,7 @@ export async function generateMetadata({
         description: episodeDescription,
         url: `${baseUrl}/episode/${slug}`,
         type: 'video.episode',
-        siteName: 'movies123',
+        siteName: '123Movies',
       },
       twitter: {
         card: 'summary_large_image',

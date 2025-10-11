@@ -52,7 +52,7 @@ export function generateMovieSEO(movie: Movie, baseUrl?: string): SEOConfig {
     : `Watch ${movie.title} online for free. Download ${movie.title} in HD quality. ${movie.genres?.map(g => g.name).join(', ')} movie from ${movie.release_date?.split('-')[0] || 'N/A'}. Free streaming available.`;
 
   return {
-    title: `${movie.title} (${movie.release_date?.split('-')[0] || 'N/A'}) - Watch Online Free | movies123`,
+    title: `${movie.title} (${movie.release_date?.split('-')[0] || 'N/A'}) - Watch Online Free | 123Movies`,
     description: description,
     keywords,
     image: posterUrl,
@@ -74,7 +74,7 @@ export function generateMovieMetadata(seoConfig: SEOConfig): Metadata {
       title: seoConfig.title,
       description: seoConfig.description,
       url: seoConfig.url,
-      siteName: 'movies123',
+      siteName: '123Movies',
       images: seoConfig.image ? [
         {
           url: seoConfig.image,
@@ -120,7 +120,7 @@ export function generateMovieMetadata(seoConfig: SEOConfig): Metadata {
 
 export function generateHomePageSEO(): SEOConfig {
   return {
-    title: 'movies123 - Watch Movies Online Free | HD Movie Streaming',
+    title: '123Movies - Watch Movies Online Free | HD Movie Streaming',
     description: 'Watch thousands of movies online for free. Download HD movies, stream latest releases, and discover your favorite films. No registration required.',
     keywords: [
       'watch movies online free',
@@ -141,7 +141,7 @@ export function generateHomePageSEO(): SEOConfig {
 
 export function generateSearchPageSEO(query: string): SEOConfig {
   return {
-    title: `Search Results for "${query}" - movies123`,
+    title: `Search Results for "${query}" - 123Movies`,
     description: `Find movies related to "${query}". Watch and download your favorite movies online for free.`,
     keywords: [
       `search ${query}`,
@@ -158,7 +158,7 @@ export function generateSearchPageSEO(query: string): SEOConfig {
 
 export function generateGenrePageSEO(genreName: string, baseUrl?: string): SEOConfig {
   return {
-    title: `${genreName} Movies | Watch ${genreName} Movies Online Free | movies123`,
+    title: `${genreName} Movies | Watch ${genreName} Movies Online Free | 123Movies`,
     description: `Watch the best ${genreName.toLowerCase()} movies online for free. Discover top-rated ${genreName.toLowerCase()} films, latest releases, and classic favorites.`,
     keywords: [`${genreName.toLowerCase()} movies`, 'watch movies online', 'free movies', 'movie streaming', `${genreName.toLowerCase()} films`],
     url: baseUrl || 'https://ww1.n123movie.me',
@@ -168,7 +168,7 @@ export function generateGenrePageSEO(genreName: string, baseUrl?: string): SEOCo
 
 export function generateCountryPageSEO(countryName: string, baseUrl?: string): SEOConfig {
   return {
-    title: `${countryName} Movies | Watch ${countryName} Movies Online Free | movies123`,
+    title: `${countryName} Movies | Watch ${countryName} Movies Online Free | 123Movies`,
     description: `Watch the best ${countryName} movies online for free. Discover top-rated films from ${countryName}, latest releases, and classic favorites.`,
     keywords: [`${countryName} movies`, 'watch movies online', 'free movies', 'movie streaming', `${countryName} films`],
     url: baseUrl || 'https://ww1.n123movie.me',
@@ -178,7 +178,7 @@ export function generateCountryPageSEO(countryName: string, baseUrl?: string): S
 
 export function generateMoviesPageSEO(baseUrl?: string): SEOConfig {
   return {
-    title: 'All Movies | Watch Movies Online Free | movies123',
+    title: 'All Movies | Watch Movies Online Free | 123Movies',
     description: 'Browse thousands of movies online for free. Watch latest releases, classic films, and discover your favorite movies. No registration required.',
     keywords: ['all movies', 'watch movies online', 'free movies', 'movie streaming', 'browse movies', 'movie collection'],
     url: baseUrl || 'https://ww1.n123movie.me',

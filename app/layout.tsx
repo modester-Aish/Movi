@@ -15,12 +15,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "movies123 - Watch Movies Online Free | HD Movie Streaming",
+  title: "123Movies - Watch Movies Online Free | HD Movie Streaming",
   description: "Watch thousands of movies online for free. Download HD movies, stream latest releases, and discover your favorite films. No registration required.",
   keywords: "watch movies online free, download movies HD, movie streaming, free movies online, HD movies, latest movies, movie downloads, online cinema, streaming movies, free movie site",
-  authors: [{ name: "movies123" }],
-  creator: "movies123",
-  publisher: "movies123",
+  authors: [{ name: "123Movies" }],
+  creator: "123Movies",
+  publisher: "123Movies",
   icons: {
     icon: '/favicon.svg',
     shortcut: '/favicon.svg',
@@ -41,13 +41,13 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_US',
     url: getBaseUrl(),
-    siteName: 'movies123',
-    title: 'movies123 - Watch Movies Online Free | HD Movie Streaming',
+    siteName: '123Movies',
+    title: '123Movies - Watch Movies Online Free | HD Movie Streaming',
     description: 'Watch thousands of movies online for free. Download HD movies, stream latest releases, and discover your favorite films. No registration required.',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'movies123 - Watch Movies Online Free | HD Movie Streaming',
+    title: '123Movies - Watch Movies Online Free | HD Movie Streaming',
     description: 'Watch thousands of movies online for free. Download HD movies, stream latest releases, and discover your favorite films. No registration required.',
   },
   alternates: {

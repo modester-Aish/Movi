@@ -53,7 +53,7 @@ function TVSearchModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
 
   const handleSuggestionClick = (series: any) => {
     const slug = series.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
-    window.location.href = `/series/${slug}-${series.tmdb_id || series.imdb_id}`;
+    window.location.href = `/${slug}-${series.tmdb_id || series.imdb_id}`;
   };
 
   if (!isOpen) return null;
