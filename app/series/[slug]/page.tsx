@@ -5,6 +5,7 @@ import { getTVImageUrl } from "@/api/tmdb-tv";
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { cache } from 'react';
+import clientPromise from '@/lib/mongodb-client';
 
 interface SeriesPageProps {
   params: Promise<{
@@ -91,11 +92,60 @@ export default async function SeriesDetailPage({ params }: SeriesPageProps) {
     notFound();
   }
   
-  // TV_SERIES_STATIC removed - using MongoDB API instead
-  const staticData = null;
-  
-  // Static data removed - using TMDB data only
-  const seasons: SeasonData[] = [];
+  // Fetch seasons/episodes data directly from MongoDB
+  let seasons: SeasonData[] = [];
+  try {
+    const client = await clientPromise;
+    const db = client.db('moviesDB');
+    const episodesCollection = db.collection('episodes');
+    
+    // First get the series from our database to get the IMDB ID
+    const seriesCollection = db.collection('tvSeries');
+    const seriesData = await seriesCollection.findOne({ tmdb_id: tmdbId });
+    
+    if (!seriesData || !seriesData.imdb_id) {
+      console.log(`No series found in database for TMDB ID ${tmdbId}`);
+      return;
+    }
+    
+    // Fetch episodes for this series using IMDB ID (since static data uses IMDB IDs)
+    const episodes = await episodesCollection
+      .find({ series_imdb_id: seriesData.imdb_id })
+      .sort({ season_number: 1, episode_number: 1 })
+      .toArray();
+    
+    // Group episodes by season
+    const seasonMap = new Map<number, SeasonData>();
+    
+    episodes.forEach((episode: any) => {
+      const seasonNumber = episode.season_number;
+      
+      if (!seasonMap.has(seasonNumber)) {
+        seasonMap.set(seasonNumber, {
+          season_number: seasonNumber,
+          episodeCount: 0,
+          episodes: []
+        });
+      }
+      
+      const season = seasonMap.get(seasonNumber)!;
+      season.episodeCount++;
+      season.episodes.push({
+        episode_imdb_id: episode.episode_imdb_id || `episode-${episode.episode_number}`,
+        episode_number: episode.episode_number,
+        episode_name: episode.episode_name || `Episode ${episode.episode_number}`,
+        still_path: episode.still_path
+      });
+    });
+    
+    // Convert map to array and sort by season number
+    seasons = Array.from(seasonMap.values()).sort((a, b) => a.season_number - b.season_number);
+    
+    console.log(`Found ${episodes.length} episodes for series ${tmdbId}, grouped into ${seasons.length} seasons`);
+  } catch (error) {
+    console.error('Error fetching episodes from MongoDB:', error);
+    // Fallback to empty seasons array
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">

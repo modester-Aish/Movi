@@ -5,6 +5,7 @@ import { getTVImageUrl } from "@/api/tmdb-tv";
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { cache } from 'react';
+import clientPromise from '@/lib/mongodb-client';
 
 interface SeasonPageProps {
   params: Promise<{
@@ -102,11 +103,47 @@ export default async function SeasonPage({ params }: SeasonPageProps) {
     notFound();
   }
   
-  // TV_SERIES_STATIC removed - using MongoDB API instead
-  const staticData = null;
-  
-  // Static data removed - using TMDB data only
-  const episodes: EpisodeData[] = [];
+  // Fetch episodes from MongoDB database
+  let episodes: EpisodeData[] = [];
+  try {
+    const client = await clientPromise;
+    const db = client.db('moviesDB');
+    const seriesCollection = db.collection('tvSeries');
+    const episodesCollection = db.collection('episodes');
+    
+    // First get the series from our database to get the IMDB ID
+    const seriesData = await seriesCollection.findOne({ tmdb_id: tmdbId });
+    
+    if (!seriesData || !seriesData.imdb_id) {
+      console.log(`No series found in database for TMDB ID ${tmdbId}`);
+      notFound();
+      return;
+    }
+    
+    // Fetch episodes for this season using IMDB ID
+    const episodeDocs = await episodesCollection
+      .find({ 
+        series_imdb_id: seriesData.imdb_id,
+        season_number: seasonNumber
+      })
+      .sort({ episode_number: 1 })
+      .toArray();
+    
+    episodes = episodeDocs.map((episode: any) => ({
+      episode_imdb_id: episode.episode_imdb_id,
+      episode_number: episode.episode_number,
+      episode_name: episode.episode_name,
+      overview: episode.overview,
+      still_path: episode.still_path,
+      air_date: episode.air_date,
+      vote_average: episode.vote_average,
+      runtime: episode.runtime
+    }));
+    
+    console.log(`Found ${episodes.length} episodes for ${series.name} Season ${seasonNumber}`);
+  } catch (error) {
+    console.error('Error fetching episodes from MongoDB:', error);
+  }
   
   if (episodes.length === 0) {
     notFound();

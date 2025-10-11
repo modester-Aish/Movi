@@ -184,26 +184,26 @@ function TVSeriesDisplay({ activeCategory, categoryConfig }: { activeCategory: s
         if (result.success && result.data) {
           const seriesData = result.data.map((data: any) => ({
             imdbId: data.imdb_id,
-            tmdbId: data.tmdb_id,
+          tmdbId: data.tmdb_id,
             name: data.name || `TV Series ${data.imdb_id}`,
-            poster: data.poster_path,
-            backdrop: data.backdrop_path,
-            overview: data.overview,
-            firstAirDate: data.first_air_date,
-            voteAverage: data.vote_average || 0,
+          poster: data.poster_path,
+          backdrop: data.backdrop_path,
+          overview: data.overview,
+          firstAirDate: data.first_air_date,
+          voteAverage: data.vote_average || 0,
             episodeCount: data.seasons?.reduce((sum: number, season: any) => sum + season.episodes.length, 0) || 0,
-            numberOfSeasons: data.number_of_seasons || data.seasons?.length || 0
-          }));
-          
+          numberOfSeasons: data.number_of_seasons || data.seasons?.length || 0
+        }));
+      
           setCategorySeries(seriesData);
           setLoadedCategories(prev => new Set([...prev, activeCategory]));
         }
-        setLoading(false);
+      setLoading(false);
       })
       .catch(error => {
-        console.error('Error loading TV series data:', error);
-        setLoading(false);
-      });
+      console.error('Error loading TV series data:', error);
+      setLoading(false);
+    });
   }, [activeCategory, loadedCategories]);
   
   // Reset display count when category changes
