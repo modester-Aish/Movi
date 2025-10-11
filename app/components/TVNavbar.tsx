@@ -21,9 +21,25 @@ export default function TVNavbar() {
       const response = await fetch('/api/tv-years');
       const data = await response.json();
       
-      if (data.years) {
-        setYears(data.years);
-        setDecades(data.decades || []);
+      if (data.success && data.data) {
+        // Extract years from the data
+        const yearNumbers = data.data.map((item: any) => item.year).sort((a: number, b: number) => b - a);
+        setYears(yearNumbers);
+        
+        // Group into decades
+        const decadeMap: {[key: string]: number[]} = {};
+        yearNumbers.forEach((year: number) => {
+          const decade = `${Math.floor(year / 10) * 10}s`;
+          if (!decadeMap[decade]) decadeMap[decade] = [];
+          decadeMap[decade].push(year);
+        });
+        
+        const decadesArray = Object.entries(decadeMap).map(([decade, years]) => ({
+          decade,
+          years: years.sort((a, b) => b - a)
+        })).sort((a, b) => parseInt(b.decade) - parseInt(a.decade));
+        
+        setDecades(decadesArray);
         setYearsLoaded(true); // Mark as loaded
       }
     } catch (error) {

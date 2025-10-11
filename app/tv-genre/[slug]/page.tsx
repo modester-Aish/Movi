@@ -37,7 +37,9 @@ export default function TVGenrePage() {
         setLoadingMore(true);
       }
       
-      const response = await fetch(`/api/tv-series-db?limit=${ITEMS_PER_PAGE}&skip=${skip}&sortBy=first_air_date&sortOrder=desc`);
+      // Use genre filter from API
+      const genreName = genre?.name || '';
+      const response = await fetch(`/api/tv-series-db?limit=${ITEMS_PER_PAGE}&skip=${skip}&sortBy=first_air_date&sortOrder=desc&genre=${encodeURIComponent(genreName)}`);
       const result = await response.json();
       
       if (result.success && result.data) {

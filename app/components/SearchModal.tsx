@@ -14,8 +14,9 @@ interface SearchModalProps {
 
 export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
   const [searchTerm, setSearchTerm] = useState("");
-  const [suggestions, setSuggestions] = useState<Movie[]>([]);
+  const [suggestions, setSuggestions] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [searchType, setSearchType] = useState<'movies' | 'tv'>('movies');
   const router = useRouter();
 
   useEffect(() => {

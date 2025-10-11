@@ -12,6 +12,128 @@ import type { Movie } from "@/api/tmdb";
 import { generateMovieUrl } from "@/lib/slug";
 import { getTVImageUrl } from "@/api/tmdb-tv";
 
+// TV Search Modal Component
+function TVSearchModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setSearchTerm("");
+      setSuggestions([]);
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      if (searchTerm.trim().length < 2) {
+        setSuggestions([]);
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const response = await fetch(`/api/tv-series-search?q=${encodeURIComponent(searchTerm)}&limit=10`);
+        const result = await response.json();
+        
+        if (result.success && result.data) {
+          setSuggestions(result.data);
+        }
+      } catch (error) {
+        console.error('Error searching TV series:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const timeoutId = setTimeout(fetchSuggestions, 300);
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm]);
+
+  const handleSuggestionClick = (series: any) => {
+    const slug = series.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    window.location.href = `/series/${slug}-${series.tmdb_id || series.imdb_id}`;
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center pt-20 z-50">
+      <div className="bg-gray-900 rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[80vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-bold text-white">🔍 Search TV Series</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-white text-2xl"
+          >
+            ×
+          </button>
+        </div>
+
+        {/* Search Input */}
+        <div className="relative mb-6">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            {loading ? (
+              <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-purple-500"></div>
+            ) : (
+              <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            )}
+          </div>
+          <input
+            type="text"
+            placeholder="Search TV series..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-3 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+            autoFocus
+          />
+        </div>
+
+        {/* Suggestions */}
+        {suggestions.length > 0 && (
+          <div className="space-y-2">
+            <h4 className="text-purple-400 font-semibold">💡 TV Series:</h4>
+            {suggestions.map((series, index) => (
+              <button
+                key={`${series.imdb_id}-${index}`}
+                onClick={() => handleSuggestionClick(series)}
+                className="w-full flex items-center space-x-3 p-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors text-left"
+              >
+                <div className="relative w-12 h-16 bg-gray-700 rounded overflow-hidden flex-shrink-0">
+                  <Image
+                    src={series.poster_path ? getTVImageUrl(series.poster_path, 'w500') : '/placeholder.svg'}
+                    alt={series.name}
+                    width={48}
+                    height={64}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-white font-semibold">{series.name}</h3>
+                  <p className="text-gray-400 text-sm">
+                    {series.first_air_date ? series.first_air_date.split('-')[0] : 'N/A'} • 
+                    {series.number_of_seasons} seasons • 
+                    ⭐ {series.vote_average?.toFixed(1) || 'N/A'}
+                  </p>
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {searchTerm.length > 0 && suggestions.length === 0 && !loading && (
+          <div className="text-center py-8">
+            <p className="text-gray-400">No TV series found for "{searchTerm}"</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // TV Series Display Component - Lazy Loading for Categories
 function TVSeriesDisplay({ activeCategory, categoryConfig }: { activeCategory: string, categoryConfig: any[] }) {
   const [displayCount, setDisplayCount] = useState(7); // Load only 7 initially
@@ -28,26 +150,35 @@ function TVSeriesDisplay({ activeCategory, categoryConfig }: { activeCategory: s
     
     setLoading(true);
     
-    // Determine sort order based on category
+    // Determine sort order and filters based on category
     let sortBy = 'first_air_date';
     let sortOrder = 'desc';
+    let additionalFilters = '';
     
     if (activeCategory === 'Popular') {
       sortBy = 'vote_average';
       sortOrder = 'desc';
+      additionalFilters = '&minRating=7.0'; // Only high-rated shows
     } else if (activeCategory === 'Featured') {
       sortBy = 'vote_average';
       sortOrder = 'desc';
+      additionalFilters = '&minRating=8.0'; // Only top-rated shows
     } else if (activeCategory === 'Classic Shows') {
       sortBy = 'first_air_date';
       sortOrder = 'asc';
+      additionalFilters = '&maxYear=2010'; // Shows before 2010
     } else if (activeCategory === 'Trending') {
       sortBy = 'first_air_date';
       sortOrder = 'desc';
+      additionalFilters = '&minYear=2020'; // Recent shows
+    } else if (activeCategory === 'New Releases') {
+      sortBy = 'first_air_date';
+      sortOrder = 'desc';
+      additionalFilters = '&minYear=2023'; // Very recent shows
     }
     
     // Fetch only 28 series for category (7 * 4 pages max)
-    fetch(`/api/tv-series-db?limit=28&sortBy=${sortBy}&sortOrder=${sortOrder}`)
+    fetch(`/api/tv-series-db?limit=28&sortBy=${sortBy}&sortOrder=${sortOrder}${additionalFilters}`)
       .then(res => res.json())
       .then(result => {
         if (result.success && result.data) {
@@ -195,6 +326,9 @@ export default function HomePage() {
   
   // Mode switching state - Default to MOVIES
   const [currentMode, setCurrentMode] = useState<'movies' | 'tv'>('movies');
+  
+  // TV Search Modal state
+  const [isTVSearchOpen, setIsTVSearchOpen] = useState(false);
   
   // Load saved mode from localStorage on mount (ONLY if explicitly set)
   useEffect(() => {
@@ -662,7 +796,14 @@ export default function HomePage() {
                 <li><Link href="/series-static" className="text-gray-400 hover:text-white transition-colors text-sm">TV Series</Link></li>
                 <li><Link href="/genres" className="text-gray-400 hover:text-white transition-colors text-sm">Genres</Link></li>
                 <li><Link href="/country" className="text-gray-400 hover:text-white transition-colors text-sm">Countries</Link></li>
-                <li><Link href="/search" className="text-gray-400 hover:text-white transition-colors text-sm">Search</Link></li>
+                <li>
+                  <button 
+                    onClick={() => setIsTVSearchOpen(true)}
+                    className="text-gray-400 hover:text-white transition-colors text-sm"
+                  >
+                    Search TV Series
+                  </button>
+                </li>
               </ul>
             </div>
 
@@ -692,6 +833,12 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
+
+      {/* TV Search Modal */}
+      <TVSearchModal 
+        isOpen={isTVSearchOpen} 
+        onClose={() => setIsTVSearchOpen(false)} 
+      />
     </div>
   );
 }

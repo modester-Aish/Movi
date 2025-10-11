@@ -31,26 +31,23 @@ export default function TVYearPage() {
     }
   }, [year]);
 
-  // Load TV series data dynamically
+  // Load TV series data from MongoDB API
   useEffect(() => {
     if (!year || isNaN(year)) return;
     
     setLoading(true);
-    import('@/data/tvSeriesStatic').then(({ TV_SERIES_STATIC }) => {
-      const seriesData = Object.entries(TV_SERIES_STATIC)
-    .filter(([_, data]) => {
-      if (!data.name || !data.first_air_date) return false;
-      const seriesYear = new Date(data.first_air_date).getFullYear();
-      return seriesYear === year;
-    })
-    .sort((a, b) => {
-      // Sort by vote_average (highest first)
-      return (b[1].vote_average || 0) - (a[1].vote_average || 0);
-    })
-    .map(([imdbId, data]) => ({
-      imdb_id: imdbId,
+    
+    // Fetch series by year from MongoDB
+    console.log(`Fetching TV series for year: ${year}`);
+    fetch(`/api/tv-series-db?limit=100&year=${year}&sortBy=vote_average&sortOrder=desc`)
+      .then(res => res.json())
+      .then(result => {
+        console.log(`TV series API response for year ${year}:`, result);
+        if (result.success && result.data) {
+          const seriesData = result.data.map((data: any) => ({
+      imdb_id: data.imdb_id,
       tmdb_id: data.tmdb_id,
-      name: data.name || `TV Series ${imdbId}`,
+      name: data.name || `TV Series ${data.imdb_id}`,
       poster_path: data.poster_path,
       backdrop_path: data.backdrop_path,
       overview: data.overview,
@@ -58,14 +55,19 @@ export default function TVYearPage() {
       vote_average: data.vote_average || 0,
       number_of_seasons: data.number_of_seasons || data.seasons?.length || 0,
       episodeCount: data.seasons?.reduce((sum, season) => sum + season.episodes.length, 0) || 0
-    }));
-      
-      setAllSeriesData(seriesData);
-      setLoading(false);
-    }).catch(error => {
-      console.error('Error loading TV series data:', error);
-      setLoading(false);
-    });
+          }));
+          
+          setAllSeriesData(seriesData);
+          console.log(`Loaded ${seriesData.length} series for year ${year}`);
+        } else {
+          console.log(`No data found for year ${year}`);
+        }
+        setLoading(false);
+      })
+      .catch(error => {
+        console.error('Error loading TV series data:', error);
+        setLoading(false);
+      });
   }, [year]);
   
   if (!year || isNaN(year)) {
