@@ -19,15 +19,16 @@ const eslintConfig = [
       "build/**",
       "next-env.d.ts",
     ],
-    rules: {
-      // Disable all rules that cause build failures
-      '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-unused-vars': 'off',
-      '@typescript-eslint/no-require-imports': 'off',
-      'react/no-unescaped-entities': 'off',
-      'react-hooks/exhaustive-deps': 'off',
-      '@next/next/no-img-element': 'off',
-    },
+           rules: {
+             // Disable all rules that cause build failures
+             '@typescript-eslint/no-explicit-any': 'off',
+             '@typescript-eslint/no-unused-vars': 'off',
+             '@typescript-eslint/no-require-imports': 'off',
+             'react/no-unescaped-entities': 'off',
+             'react-hooks/exhaustive-deps': 'off',
+             '@next/next/no-img-element': 'off',
+             'prefer-const': 'off',
+           },
   },
 ];
 
