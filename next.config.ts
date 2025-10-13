@@ -9,11 +9,20 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
+    formats: ['image/webp', 'image/avif'],
+    minimumCacheTTL: 86400, // 24 hours
+    dangerouslyAllowSVG: true,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
   // Production optimizations
   compress: true,
   poweredByHeader: false,
   generateEtags: false,
+  // Performance optimizations
+  experimental: {
+    optimizeCss: true,
+    optimizePackageImports: ['@/components', '@/lib'],
+  },
   // Environment variables
   env: {
     TMDB_API_KEY: process.env.TMDB_API_KEY,

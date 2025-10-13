@@ -7,7 +7,6 @@ import { getMoviesByImdbIds } from "@/api/tmdb";
 import { BULK_MOVIE_IDS } from "@/data/bulkMovieIds";
 import type { Movie } from "@/api/tmdb";
 import { generateMovieUrl } from "@/lib/slug";
-import Head from "next/head";
 
 interface GenrePageProps {
   params: Promise<{
@@ -15,42 +14,47 @@ interface GenrePageProps {
   }>;
 }
 
+const getGenreIndex = (slug: string): number => {
+  const genreMap: {[key: string]: number} = {
+    'action': 0, 'action-adventure': 1, 'adventure': 2, 'animation': 3,
+    'biography': 4, 'comedy': 5, 'costume': 6, 'crime': 7,
+    'documentary': 8, 'drama': 9, 'family': 10, 'fantasy': 11,
+    'film-noir': 12, 'game-show': 13, 'history': 14, 'horror': 15,
+    'romance': 16, 'kungfu': 17, 'music': 18, 'musical': 19,
+    'mystery': 20, 'mythological': 21, 'news': 22, 'psychological': 23,
+    'reality': 24, 'reality-tv': 25, 'sci-fi': 26, 'sci-fi-fantasy': 27,
+    'science-fiction': 28, 'short': 29
+  };
+  return genreMap[slug] || 0;
+};
+
 export default function GenrePage({ params }: GenrePageProps) {
+  const [slug, setSlug] = useState("");
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [genreName, setGenreName] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-  const [genreSlug, setGenreSlug] = useState("");
 
   useEffect(() => {
     loadGenreMovies();
   }, []);
 
   const loadGenreMovies = async () => {
-    setLoading(true);
     try {
-      const { slug } = await params;
-      const slugValue = slug;
-      setGenreSlug(slugValue);
+      const { slug: slugParam } = await params;
+      setSlug(slugParam);
       
-      // Convert slug to readable name
-      const name = slugValue.split('-').map(word => 
-        word.charAt(0).toUpperCase() + word.slice(1)
-      ).join(' ');
-      setGenreName(name);
-
-      // Load first 20 movies for this genre
-      const genreIndex = getGenreIndex(slugValue);
-      const startIndex = 1000 + (genreIndex * 200); // Start from index 1000
-      const endIndex = startIndex + 20;
+      // Load first 7 movies for this genre
+      const genreIndex = getGenreIndex(slugParam);
+      const startIndex = 1000 + (genreIndex * 200);
+      const endIndex = startIndex + 7;
       const movieIds = BULK_MOVIE_IDS.slice(startIndex, endIndex);
       
       const moviesData = await getMoviesByImdbIds(movieIds);
       setMovies(moviesData);
       setCurrentPage(1);
-      setHasMore(movieIds.length === 20);
+      setHasMore(movieIds.length === 7);
     } catch (error) {
       console.error('Error loading genre movies:', error);
     }
@@ -62,9 +66,9 @@ export default function GenrePage({ params }: GenrePageProps) {
     
     setLoadingMore(true);
     try {
-      const genreIndex = getGenreIndex(genreSlug);
-      const startIndex = 1000 + (genreIndex * 200) + (currentPage * 20);
-      const endIndex = startIndex + 20;
+      const genreIndex = getGenreIndex(slug);
+      const startIndex = 1000 + (genreIndex * 200) + (currentPage * 7);
+      const endIndex = startIndex + 7;
       const movieIds = BULK_MOVIE_IDS.slice(startIndex, endIndex);
       
       if (movieIds.length === 0) {
@@ -73,6 +77,7 @@ export default function GenrePage({ params }: GenrePageProps) {
         const moviesData = await getMoviesByImdbIds(movieIds);
         setMovies(prev => [...prev, ...moviesData]);
         setCurrentPage(prev => prev + 1);
+        setHasMore(movieIds.length === 7);
       }
     } catch (error) {
       console.error('Error loading more movies:', error);
@@ -81,38 +86,25 @@ export default function GenrePage({ params }: GenrePageProps) {
     setLoadingMore(false);
   };
 
-  const getGenreIndex = (slug: string): number => {
-    const genreMap: {[key: string]: number} = {
-      'action': 0, 'action-adventure': 1, 'adventure': 2, 'animation': 3,
-      'biography': 4, 'comedy': 5, 'costume': 6, 'crime': 7,
-      'documentary': 8, 'drama': 9, 'family': 10, 'fantasy': 11,
-      'film-noir': 12, 'game-show': 13, 'history': 14, 'horror': 15,
-      'romance': 16, 'kungfu': 17, 'music': 18, 'musical': 19,
-      'mystery': 20, 'mythological': 21, 'news': 22, 'psychological': 23,
-      'reality': 24, 'reality-tv': 25, 'sci-fi': 26, 'sci-fi-fantasy': 27,
-      'science-fiction': 28, 'short': 29
-    };
-    return genreMap[slug] || 0;
-  };
+  // Convert slug to readable name
+  const genreName = slug.split('-').map(word => 
+    word.charAt(0).toUpperCase() + word.slice(1)
+  ).join(' ');
 
   return (
-    <>
-      <Head>
-        <link rel="canonical" href={`https://ww1.n123movie.me/genre/${genreSlug}`} />
-      </Head>
-      <div className="min-h-screen bg-gray-900">
+    <div className="min-h-screen bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <h1 className="text-3xl font-bold text-white mb-8">{genreName} Movies</h1>
         
         {loading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-8 gap-3">
-            {Array.from({ length: 80 }).map((_, i) => (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 gap-3">
+            {Array.from({ length: 7 }).map((_, i) => (
               <div key={i} className="aspect-[2/3] bg-gray-800 rounded animate-pulse"></div>
             ))}
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-8 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 gap-3">
               {movies.map((movie, index) => (
                 <Link
                   key={`${movie.imdb_id}-${index}`}
@@ -121,14 +113,10 @@ export default function GenrePage({ params }: GenrePageProps) {
                 >
                   <div className="relative aspect-[2/3] bg-gray-800 rounded overflow-hidden shadow-lg group-hover:shadow-2xl transition-all duration-300">
                     <Image
-                      src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-                      alt={movie.title}
+                      src={movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : '/placeholder.svg'}
+                      alt={`${movie.title} movie poster`}
                       fill
                       className="object-cover group-hover:scale-105 transition-transform duration-300"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = '/placeholder.svg';
-                      }}
                     />
                     
                     <div className="absolute top-0.5 right-0.5 bg-yellow-500 text-black text-xs font-bold px-1 py-0.5 rounded">
@@ -180,6 +168,5 @@ export default function GenrePage({ params }: GenrePageProps) {
         )}
       </div>
     </div>
-    </>
   );
 }

@@ -44,7 +44,9 @@ export async function getMovieByImdbId(imdbId: string): Promise<Movie | null> {
   try {
     // First, find the TMDB ID using the IMDB ID
     const findUrl = `${TMDB_BASE_URL}/find/${imdbId}?api_key=${TMDB_API_KEY}&external_source=imdb_id`;
-    const findResponse = await fetch(findUrl);
+    const findResponse = await fetch(findUrl, {
+      next: { revalidate: 86400 } // Cache for 24 hours
+    });
     const findData = await findResponse.json();
     
     // Check if we found any movie results
@@ -57,7 +59,9 @@ export async function getMovieByImdbId(imdbId: string): Promise<Movie | null> {
     
     // Now get the full movie details using the TMDB ID
     const detailsUrl = `${TMDB_BASE_URL}/movie/${tmdbId}?api_key=${TMDB_API_KEY}`;
-    const detailsResponse = await fetch(detailsUrl);
+    const detailsResponse = await fetch(detailsUrl, {
+      next: { revalidate: 86400 } // Cache for 24 hours
+    });
     const movieData = await detailsResponse.json();
     
     const movie = {

@@ -7,6 +7,7 @@ import Image from "next/image";
 import { getYear, searchMoviesByTitle } from "@/api/tmdb";
 import type { Movie, MovieListItem } from "@/api/tmdb";
 import { generateMovieUrl } from "@/lib/slug";
+import StructuredData from '@/components/StructuredData';
 
 export default function SimpleLandingPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -45,7 +46,9 @@ export default function SimpleLandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <>
+      <StructuredData type="website" />
+      <div className="min-h-screen bg-white">
       {/* Main Content */}
       <div className="max-w-4xl mx-auto px-6 py-12">
         {/* Hero Section */}
@@ -355,6 +358,7 @@ export default function SimpleLandingPage() {
           </div>
         </div>
       </footer>
-    </div>
+      </div>
+    </>
   );
 }

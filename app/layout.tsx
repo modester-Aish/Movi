@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import DynamicNavbar from "./components/DynamicNavbar";
 import { getBaseUrl } from "./lib/domain";
+import PreloadResources from "./components/PreloadResources";
+import GoogleAnalytics from "./components/GoogleAnalytics";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -63,7 +65,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <meta name="google-site-verification" content="lpmRdQ218vRv4F_8c0Pb6kE7fRS1y-EHP_94UH-avlQ" />
+        <PreloadResources />
+        <meta name="google-site-verification" content="fHWPvFeUN7ThGMHOZRkX92ddN2eNAxA1PYykRBcAGHg" />
+        <meta name="msvalidate.01" content="CA9C80743C5C403924230A48CF321E7C" />
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="shortcut icon" href="/favicon.svg" />
         <link rel="apple-touch-icon" href="/favicon.svg" />
@@ -71,6 +75,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <GoogleAnalytics measurementId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || ''} />
         <DynamicNavbar />
         {children}
       </body>

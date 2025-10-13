@@ -29,9 +29,11 @@ export default function MovieCard({ movie, index }: MovieCardProps) {
       <div className="relative aspect-[2/3] bg-gray-800 rounded overflow-hidden shadow-lg group-hover:shadow-2xl transition-all duration-300">
         <Image
           src={movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : '/placeholder.svg'}
-          alt={movie.title}
+          alt={`${movie.title} movie poster`}
           fill
           className="object-cover group-hover:scale-105 transition-transform duration-300"
+          sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, (max-width: 1280px) 20vw, 12.5vw"
+          priority={index < 8} // Prioritize first 8 images, no loading="lazy" needed
           onError={(e) => {
             const target = e.target as HTMLImageElement;
             target.src = '/placeholder.svg';

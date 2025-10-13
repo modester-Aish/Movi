@@ -1,10 +1,8 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import MovieCard from "@/components/MovieCard";
-import Head from 'next/head';
 
 // Movie type based on our processed data
 interface ProcessedMovie {
@@ -23,29 +21,35 @@ interface ProcessedMovie {
   genres: number[];
 }
 
-export default function YearPage() {
-  const params = useParams();
-  const year = params.slug as string;
+interface YearPageProps {
+  params: Promise<{
+    slug: string;
+  }>;
+}
+
+export default function YearPage({ params }: YearPageProps) {
+  const [slug, setSlug] = useState("");
   const [movies, setMovies] = useState<ProcessedMovie[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [totalMovies, setTotalMovies] = useState(0);
-  const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 20,
-    total: 0,
-    pages: 0,
-    hasNextPage: false,
-    hasPrevPage: false
-  });
 
   useEffect(() => {
-    if (year) {
-      loadMovies(year);
+    loadSlug();
+  }, []);
+
+  useEffect(() => {
+    if (slug) {
+      loadMovies(slug);
     }
-  }, [year]);
+  }, [slug]);
+
+  const loadSlug = async () => {
+    const { slug: slugParam } = await params;
+    setSlug(slugParam);
+  };
 
   const loadMovies = async (yearParam: string, page: number = 1) => {
     if (page === 1) {
@@ -55,7 +59,7 @@ export default function YearPage() {
     }
     
     try {
-      const response = await fetch(`/api/movies/year?year=${yearParam}&page=${page}&limit=20`);
+      const response = await fetch(`/api/movies/year?year=${yearParam}&page=${page}&limit=7`);
       const data = await response.json();
       
       if (response.ok) {
@@ -65,7 +69,6 @@ export default function YearPage() {
           setMovies(prev => [...prev, ...data.movies]);
         }
         
-        setPagination(data.pagination);
         setTotalMovies(data.totalMoviesForYear);
         setCurrentPage(page);
         setHasMore(data.pagination.hasNextPage);
@@ -82,31 +85,27 @@ export default function YearPage() {
 
   const loadMoreMovies = async () => {
     if (loadingMore || !hasMore) return;
-    await loadMovies(year, currentPage + 1);
+    await loadMovies(slug, currentPage + 1);
   };
 
   const getPageTitle = () => {
-    if (year.endsWith('s') && year.length === 5) {
-      const decade = year.slice(0, 4);
+    if (slug.endsWith('s') && slug.length === 5) {
+      const decade = slug.slice(0, 4);
       return `${decade}s Movies`;
     }
-    return `${year} Movies`;
+    return `${slug} Movies`;
   };
 
   const getPageDescription = () => {
-    if (year.endsWith('s') && year.length === 5) {
-      const decade = year.slice(0, 4);
+    if (slug.endsWith('s') && slug.length === 5) {
+      const decade = slug.slice(0, 4);
       return `Browse movies from the ${decade}s`;
     }
-    return `Browse movies from ${year}`;
+    return `Browse movies from ${slug}`;
   };
 
   return (
-    <>
-      <Head>
-        <link rel="canonical" href={`https://ww1.n123movie.me/year/${year}`} />
-      </Head>
-      <div className="min-h-screen bg-gray-900">
+    <div className="min-h-screen bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -115,7 +114,7 @@ export default function YearPage() {
             <span>›</span>
             <Link href="/years" className="hover:text-white transition-colors">Years</Link>
             <span>›</span>
-            <span className="text-white">{year}</span>
+            <span className="text-white">{slug}</span>
           </nav>
           
           <h1 className="text-4xl font-bold text-white mb-4">{getPageTitle()}</h1>
@@ -144,7 +143,7 @@ export default function YearPage() {
         {/* Movies Grid */}
         {loading ? (
           <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
-            {Array.from({ length: 20 }).map((_, i) => (
+            {Array.from({ length: 7 }).map((_, i) => (
               <div key={i} className="aspect-[2/3] bg-gray-800 rounded animate-pulse"></div>
             ))}
           </div>
@@ -185,7 +184,7 @@ export default function YearPage() {
         ) : (
           <div className="text-center py-12">
             <div className="text-6xl mb-4">🎬</div>
-            <h3 className="text-xl text-gray-400 mb-4">No movies found for {year}</h3>
+            <h3 className="text-xl text-gray-400 mb-4">No movies found for {slug}</h3>
             <p className="text-gray-500 mb-6">
               {totalMovies === 0 ? 
                 "No movies have been processed for this year yet. The movie processing script is still running." :
@@ -199,7 +198,7 @@ export default function YearPage() {
                 </p>
                 <p className="text-xs text-gray-500">
                   Our system is currently processing all 95,942 movies and extracting year data. 
-                  Movies for {year} will appear here once they are processed.
+                  Movies for {slug} will appear here once they are processed.
                 </p>
               </div>
             )}
@@ -215,6 +214,5 @@ export default function YearPage() {
         )}
       </div>
     </div>
-    </>
   );
 }
