@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { generateMovieUrl } from '@/lib/slug';
 
 const DOMAIN = 'https://ww1.n123movie.me';
-const MOVIES_PER_SITEMAP = 1000; // 1k per sitemap batch
+const MOVIES_PER_SITEMAP = 10000; // 10k per sitemap batch to get ~1k valid movies
 
 export async function GET(
   request: NextRequest,
