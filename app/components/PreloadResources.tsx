@@ -1,12 +1,7 @@
 export default function PreloadResources() {
   return (
     <>
-      {/* Preload critical fonts */}
-      <link
-        rel="preload"
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-        as="style"
-      />
+      {/* Preload critical resources */}
       
       {/* Preload critical images */}
       <link

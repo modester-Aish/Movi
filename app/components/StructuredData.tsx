@@ -24,7 +24,7 @@ export default function StructuredData({ movie, series, type }: StructuredDataPr
         "@type": "AggregateRating",
         "ratingValue": movie.vote_average,
         "bestRating": 10,
-        "ratingCount": movie.vote_count || 0
+        "ratingCount": 0
       } : undefined,
       "actor": [], // Will be populated when we have cast data
       "director": [], // Will be populated when we have crew data
@@ -57,7 +57,7 @@ export default function StructuredData({ movie, series, type }: StructuredDataPr
         "@type": "AggregateRating",
         "ratingValue": series.vote_average,
         "bestRating": 10,
-        "ratingCount": series.vote_count || 0
+        "ratingCount": 0
       } : undefined,
       "sameAs": series.external_ids?.imdb_id ? `https://www.imdb.com/title/${series.external_ids.imdb_id}/` : undefined,
       "potentialAction": {
