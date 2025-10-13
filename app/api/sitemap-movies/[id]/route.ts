@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { generateMovieUrl } from '@/lib/slug';
 
 const DOMAIN = 'https://ww1.n123movie.me';
-const MOVIES_PER_SITEMAP = 10000; // 10k per sitemap batch to get ~1k valid movies
+const MOVIES_PER_SITEMAP = 1000; // 1k per sitemap batch
 
 export async function GET(
   request: NextRequest,
@@ -33,17 +33,15 @@ export async function GET(
     
     console.log(`Generating sitemap ${sitemapNumber}: Movies ${startIndex}-${endIndex} (${movieIdsChunk.length} movies)`);
     
-    // Fetch movie details from TMDB
-    const { getMoviesByImdbIds } = await import('@/api/tmdb');
-    const movies = await getMoviesByImdbIds(movieIdsChunk);
-    
+    // Generate sitemap XML directly from movie IDs (without TMDB API call for speed)
     const lastmod = new Date().toISOString();
     
-    // Generate sitemap XML
-    const urlEntries = movies
-      .filter(movie => movie.imdb_id && movie.imdb_id.trim() !== '' && movie.title)
-      .map(movie => {
-        const url = generateMovieUrl(movie.title, movie.imdb_id);
+    // Generate sitemap XML directly from movie IDs
+    const urlEntries = movieIdsChunk
+      .filter(imdbId => imdbId && imdbId.trim() !== '')
+      .map(imdbId => {
+        // Create a basic URL structure for the movie
+        const url = `/movie/${imdbId}`;
         return `  <url>
     <loc>${DOMAIN}${url}</loc>
     <lastmod>${lastmod}</lastmod>
