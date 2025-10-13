@@ -22,6 +22,8 @@ export default function CountryPage() {
   return (
     <>
       <Head>
+        <title>Movies by Country - Watch International Films | 123Movies</title>
+        <meta name="description" content="Browse movies by country - United States, India, Japan, South Korea, France, Germany and more. Watch international films and foreign movies online for free." />
         <link rel="canonical" href="https://ww1.n123movie.me/country" />
       </Head>
       <div className="min-h-screen bg-gray-900">

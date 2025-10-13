@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { getTVImageUrl } from "@/api/tmdb-tv";
+import Head from "next/head";
 
 interface SeriesWithEpisodeCount {
   imdb_id: string;
@@ -91,7 +92,20 @@ export default function SeriesListPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
+    <>
+      <Head>
+        <title>TV Series - Watch Free TV Shows Online | 123Movies</title>
+        <meta name="description" content="Watch free TV series and shows online. Stream thousands of TV shows, seasons, and episodes in HD quality. No registration required. Latest TV series available." />
+        <meta name="keywords" content="TV series, watch TV shows online free, TV series streaming, free TV shows, latest TV series, TV episodes online, watch series free, TV show collection, stream TV series, fmovies, putlocker, moviesflix, watch free TV shows online free, free TV series streaming, best free TV show sites, TV streaming websites, free TV shows no registration, HD TV series streaming free, latest TV shows free online, new TV series streaming, TV series download free, watch TV shows HD free, streaming TV series online, free TV show websites, TV streaming platform, watch latest TV series free, free TV series site, TV streaming service, online TV shows free, watch TV series online HD, free TV series streaming sites, TV series streaming free, watch free HD TV shows, online TV series streaming free, free TV shows streaming, TV series streaming website, watch TV shows free online free, free TV series streaming platform, HD TV shows online free, streaming free TV shows, TV series streaming sites free, watch TV series online free HD, free TV series streaming website, TV series streaming free online, watch TV shows free streaming, free TV shows online streaming, TV series streaming sites HD, watch free TV shows online HD, free TV series streaming service, online TV series streaming sites, free TV shows streaming sites, TV series streaming platform free, watch TV shows free online streaming, free HD TV series streaming, TV series streaming websites free, watch free TV shows streaming, free TV series streaming sites HD, online TV shows streaming free, TV series streaming free sites, watch TV shows online streaming free, free TV series streaming websites, TV series streaming sites online, watch free TV shows online streaming, free TV shows streaming website, TV series streaming platform online, watch TV shows streaming free, free TV series streaming sites online, online TV series streaming free sites, TV series streaming free website, watch TV shows free online sites, free TV series streaming platform HD, TV series streaming sites free HD, watch free TV shows streaming HD, free TV series streaming website HD, online TV series streaming free HD, TV series streaming free sites HD, watch TV shows online streaming free HD, free TV series streaming websites HD, TV series streaming sites online HD, watch free TV shows online streaming HD, free TV shows streaming website HD, TV series streaming platform online HD, watch TV shows streaming free HD, free TV series streaming sites online HD, online TV series streaming free sites HD, TV series streaming free website HD, watch TV shows free online sites HD, free TV series streaming platform online HD, TV series streaming sites free online HD, watch free TV shows streaming online HD, free TV series streaming website online HD, online TV series streaming free online HD, TV series streaming free sites online HD, watch TV shows online streaming free online HD, free TV series streaming websites online HD, TV series streaming sites online online HD, watch free TV shows online streaming online HD, free TV shows streaming website online HD, TV series streaming platform online online HD, watch TV shows streaming free online HD, free TV series streaming sites online online HD, online TV series streaming free sites online HD, TV series streaming free website online HD, watch TV shows free online sites online HD, free TV series streaming platform online online HD" />
+        <meta property="og:title" content="TV Series - Watch Free TV Shows Online" />
+        <meta property="og:description" content="Watch free TV series and shows online. Stream thousands of TV shows, seasons, and episodes in HD quality." />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="TV Series - Watch Free TV Shows Online" />
+        <meta name="twitter:description" content="Watch free TV series and shows online. Stream thousands of TV shows, seasons, and episodes in HD quality." />
+      </Head>
+      
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -182,6 +196,7 @@ export default function SeriesListPage() {
         )}
       </div>
     </div>
+    </>
   );
 }
 

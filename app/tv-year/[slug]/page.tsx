@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { getTVImageUrl } from "@/api/tmdb-tv";
+import Head from "next/head";
 // REMOVED: import { TV_SERIES_STATIC } from "@/data/tvSeriesStatic"; // 61MB - Now lazy loaded
 
 // Helper function to create series slug
@@ -89,7 +90,20 @@ export default function TVYearPage() {
   const seriesInYear = allSeriesData.slice(0, displayCount);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
+    <>
+      <Head>
+        <title>{year} TV Shows - Watch Free Online | 123Movies</title>
+        <meta name="description" content={`Watch TV shows and series from ${year} online for free. Stream the best television series released in ${year} in HD quality. No registration required.`} />
+        <meta name="keywords" content={`${year} TV shows, ${year} TV series, watch ${year} shows online, free ${year} television series, ${year} TV programs, stream ${year} TV shows, ${year} television shows`} />
+        <meta property="og:title" content={`${year} TV Shows - Watch Free Online`} />
+        <meta property="og:description" content={`Watch TV shows and series from ${year} online for free. Stream the best television series released in ${year} in HD quality.`} />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`${year} TV Shows - Watch Free Online`} />
+        <meta name="twitter:description" content={`Watch TV shows and series from ${year} online for free. Stream the best television series released in ${year} in HD quality.`} />
+      </Head>
+      
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -183,5 +197,6 @@ export default function TVYearPage() {
         )}
       </div>
     </div>
+    </>
   );
 }

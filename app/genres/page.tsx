@@ -22,6 +22,15 @@ export default function GenresPage() {
   return (
     <>
       <Head>
+        <title>Movie Genres - Browse Movies by Category | 123Movies</title>
+        <meta name="description" content="Browse movies by genre - Action, Comedy, Drama, Horror, Romance, Sci-Fi and more. Watch free movies online categorized by your favorite genres. HD quality streaming available." />
+        <meta name="keywords" content="movie genres, action movies, comedy movies, drama movies, horror movies, romance movies, sci-fi movies, thriller movies, movie categories, browse movies by genre, free movies by category" />
+        <meta property="og:title" content="Movie Genres - Browse Movies by Category" />
+        <meta property="og:description" content="Browse movies by genre - Action, Comedy, Drama, Horror, Romance, Sci-Fi and more. Watch free movies online categorized by your favorite genres." />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Movie Genres - Browse Movies by Category" />
+        <meta name="twitter:description" content="Browse movies by genre - Action, Comedy, Drama, Horror, Romance, Sci-Fi and more. Watch free movies online categorized by your favorite genres." />
         <link rel="canonical" href="https://ww1.n123movie.me/genres" />
       </Head>
       <div className="min-h-screen bg-gray-900">

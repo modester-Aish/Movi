@@ -64,6 +64,15 @@ export default function YearsPage() {
   return (
     <>
       <Head>
+        <title>Movies by Year - Browse Films by Release Year | 123Movies</title>
+        <meta name="description" content="Browse movies by release year from 1900s to present. Watch classic films, recent releases, and movies from your favorite decades. Free HD streaming available for all years." />
+        <meta name="keywords" content="movies by year, films by decade, classic movies, recent movies, movies 2024, movies 2023, old movies, new movies, movies by release year, decade movies" />
+        <meta property="og:title" content="Movies by Year - Browse Films by Release Year" />
+        <meta property="og:description" content="Browse movies by release year from 1900s to present. Watch classic films, recent releases, and movies from your favorite decades." />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Movies by Year - Browse Films by Release Year" />
+        <meta name="twitter:description" content="Browse movies by release year from 1900s to present. Watch classic films, recent releases, and movies from your favorite decades." />
         <link rel="canonical" href="https://ww1.n123movie.me/years" />
       </Head>
       <div className="min-h-screen bg-gray-900">

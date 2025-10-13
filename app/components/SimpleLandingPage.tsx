@@ -8,6 +8,7 @@ import { getYear, searchMoviesByTitle } from "@/api/tmdb";
 import type { Movie, MovieListItem } from "@/api/tmdb";
 import { generateMovieUrl } from "@/lib/slug";
 import StructuredData from '@/components/StructuredData';
+import Head from "next/head";
 
 export default function SimpleLandingPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -47,6 +48,24 @@ export default function SimpleLandingPage() {
 
   return (
     <>
+      <Head>
+        <title>123Movies - Watch HD Movies Online Free</title>
+        <meta name="description" content="Watch HD movies online for free on 123Movies. Stream thousands of movies and TV shows without registration. No subscription required. Best quality streaming available." />
+        <meta name="keywords" content="123movies, watch movies online free, HD movies streaming, free movies online, 123movie, 123 movies, online movie streaming, watch free movies, movie streaming sites, free HD movies, fmovies, putlocker, moviesflix, watch free movies online free, free movie streaming, best free movie sites, movie streaming websites, free movies no registration, HD movie streaming free, latest movies free online, new movies streaming, movie download free, watch movies HD free, streaming movies online, free movie websites, movie streaming platform, watch latest movies free, free movie site, movie streaming service, online movies free, watch movies online HD, free movie streaming sites, movie streaming free, watch free HD movies, online movie streaming free, free movies streaming, movie streaming website, watch movies free online free, free movie streaming platform, HD movies online free, streaming free movies, movie streaming sites free, watch movies online free HD, free movie streaming website, movie streaming free online, watch movies free streaming, free movies online streaming, movie streaming sites HD, watch free movies online HD, free movie streaming service, online movie streaming sites, free movies streaming sites, movie streaming platform free, watch movies free online streaming, free HD movie streaming, movie streaming websites free, watch free movies streaming, free movie streaming sites HD, online movies streaming free, movie streaming free sites, watch movies online streaming free, free movie streaming websites, movie streaming sites online, watch free movies online streaming, free movies streaming website, movie streaming platform online, watch movies streaming free, free movie streaming sites online, online movie streaming free sites, movie streaming free website, watch movies free online sites, free movie streaming platform HD, movie streaming sites free HD, watch free movies streaming HD, free movie streaming website HD, online movie streaming free HD, movie streaming free sites HD, watch movies online streaming free HD, free movie streaming websites HD, movie streaming sites online HD, watch free movies online streaming HD, free movies streaming website HD, movie streaming platform online HD, watch movies streaming free HD, free movie streaming sites online HD, online movie streaming free sites HD, movie streaming free website HD, watch movies free online sites HD, free movie streaming platform online HD, movie streaming sites free online HD, watch free movies streaming online HD, free movie streaming website online HD, online movie streaming free online HD, movie streaming free sites online HD, watch movies online streaming free online HD, free movie streaming websites online HD, movie streaming sites online online HD, watch free movies online streaming online HD, free movies streaming website online HD, movie streaming platform online online HD, watch movies streaming free online HD, free movie streaming sites online online HD, online movie streaming free sites online HD, movie streaming free website online HD, watch movies free online sites online HD, free movie streaming platform online online HD" />
+        <meta property="og:title" content="123Movies - Watch HD Movies Online Free" />
+        <meta property="og:description" content="Watch HD movies online for free on 123Movies. Stream thousands of movies and TV shows without registration." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://ww1.n123movie.me" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="123Movies - Watch HD Movies Online Free" />
+        <meta name="twitter:description" content="Watch HD movies online for free on 123Movies. Stream thousands of movies and TV shows without registration." />
+        
+        {/* Additional SEO Meta Tags */}
+        <meta name="robots" content="index, follow" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="canonical" href="https://ww1.n123movie.me" />
+      </Head>
+      
       <StructuredData type="website" />
       <div className="min-h-screen bg-white">
       {/* Main Content */}

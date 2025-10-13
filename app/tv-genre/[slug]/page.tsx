@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { getTVImageUrl } from "@/api/tmdb-tv";
 import { getTVGenreBySlug } from "@/data/tvGenres";
+import Head from "next/head";
 
 // Helper function to create series slug
 function createSeriesSlug(name: string, id: string | number): string {
@@ -106,7 +107,20 @@ export default function TVGenrePage() {
   const seriesInGenre = allSeries;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
+    <>
+      <Head>
+        <title>{genre.name} TV Shows - Watch Free Online | 123Movies</title>
+        <meta name="description" content={`Watch ${genre.name.toLowerCase()} TV shows and series online for free. Stream the best ${genre.name.toLowerCase()} television series in HD quality. No registration required.`} />
+        <meta name="keywords" content={`${genre.name.toLowerCase()} TV shows, ${genre.name.toLowerCase()} series, watch ${genre.name.toLowerCase()} shows online, free ${genre.name.toLowerCase()} TV series, ${genre.name.toLowerCase()} television shows, stream ${genre.name.toLowerCase()} series`} />
+        <meta property="og:title" content={`${genre.name} TV Shows - Watch Free Online`} />
+        <meta property="og:description" content={`Watch ${genre.name.toLowerCase()} TV shows and series online for free. Stream the best ${genre.name.toLowerCase()} television series in HD quality.`} />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`${genre.name} TV Shows - Watch Free Online`} />
+        <meta name="twitter:description" content={`Watch ${genre.name.toLowerCase()} TV shows and series online for free. Stream the best ${genre.name.toLowerCase()} television series in HD quality.`} />
+      </Head>
+      
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -204,5 +218,6 @@ export default function TVGenrePage() {
         )}
       </div>
     </div>
+    </>
   );
 }

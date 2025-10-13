@@ -7,6 +7,7 @@ import { getMoviesByImdbIds } from "@/api/tmdb";
 import { BULK_MOVIE_IDS } from "@/data/bulkMovieIds";
 import type { Movie } from "@/api/tmdb";
 import { generateMovieUrl } from "@/lib/slug";
+import Head from "next/head";
 
 interface GenrePageProps {
   params: Promise<{
@@ -26,6 +27,67 @@ const getGenreIndex = (slug: string): number => {
     'science-fiction': 28, 'short': 29
   };
   return genreMap[slug] || 0;
+};
+
+const getGenreKeywords = (slug: string): string[] => {
+  const keywordMap: {[key: string]: string[]} = {
+    'action': [
+      'action movies free online', 'best action movies 2024', 'action movies HD streaming',
+      'watch action movies online free', 'action thriller movies', 'Hollywood action movies',
+      'action movies with subtitles', 'latest action movies', 'action movies download free',
+      // Competitor keywords
+      '123movies action', 'fmovies action movies', 'putlocker action films', 'solarmovie action',
+      'yesmovies action', 'gomovies action', 'xmovies8 action', 'primewire action movies'
+    ],
+    'comedy': [
+      'comedy movies free streaming', 'funny movies online free', 'comedy movies HD',
+      'best comedy movies 2024', 'watch comedy movies online', 'romantic comedy movies',
+      'comedy movies with subtitles', 'latest comedy movies', 'free comedy movies download',
+      // Competitor keywords
+      '123movies comedy', 'fmovies comedy movies', 'putlocker comedy films', 'solarmovie comedy',
+      'yesmovies comedy', 'gomovies comedy', 'xmovies8 comedy', 'primewire comedy movies'
+    ],
+    'horror': [
+      'horror movies free online', 'scary movies streaming free', 'horror movies HD',
+      'best horror movies 2024', 'watch horror movies online', 'thriller horror movies',
+      'horror movies with subtitles', 'latest horror movies', 'free horror movies download',
+      // Competitor keywords
+      '123movies horror', 'fmovies horror movies', 'putlocker horror films', 'solarmovie horror',
+      'yesmovies horror', 'gomovies horror', 'xmovies8 horror', 'primewire horror movies'
+    ],
+    'drama': [
+      'drama movies free streaming', 'emotional movies online free', 'drama movies HD',
+      'best drama movies 2024', 'watch drama movies online', 'romantic drama movies',
+      'drama movies with subtitles', 'latest drama movies', 'free drama movies download',
+      // Competitor keywords
+      '123movies drama', 'fmovies drama movies', 'putlocker drama films', 'solarmovie drama',
+      'yesmovies drama', 'gomovies drama', 'xmovies8 drama', 'primewire drama movies'
+    ],
+    'romance': [
+      'romance movies free online', 'romantic movies streaming free', 'romance movies HD',
+      'best romance movies 2024', 'watch romance movies online', 'romantic comedy movies',
+      'romance movies with subtitles', 'latest romance movies', 'free romance movies download',
+      // Competitor keywords
+      '123movies romance', 'fmovies romance movies', 'putlocker romance films', 'solarmovie romance',
+      'yesmovies romance', 'gomovies romance', 'xmovies8 romance', 'primewire romance movies'
+    ],
+    'sci-fi': [
+      'sci fi movies free online', 'science fiction movies streaming', 'sci fi movies HD',
+      'best sci fi movies 2024', 'watch sci fi movies online', 'space movies online free',
+      'sci fi movies with subtitles', 'latest sci fi movies', 'free sci fi movies download',
+      // Competitor keywords
+      '123movies sci fi', 'fmovies sci fi movies', 'putlocker sci fi films', 'solarmovie sci fi',
+      'yesmovies sci fi', 'gomovies sci fi', 'xmovies8 sci fi', 'primewire sci fi movies'
+    ]
+  };
+  
+  return keywordMap[slug] || [
+    `${slug} movies free online`, `best ${slug} movies 2024`, `${slug} movies HD streaming`,
+    `watch ${slug} movies online free`, `latest ${slug} movies`, `${slug} movies with subtitles`,
+    // Competitor keywords
+    `123movies ${slug}`, `fmovies ${slug} movies`, `putlocker ${slug} films`, `solarmovie ${slug}`,
+    `yesmovies ${slug}`, `gomovies ${slug}`, `xmovies8 ${slug}`, `primewire ${slug} movies`
+  ];
 };
 
 export default function GenrePage({ params }: GenrePageProps) {
@@ -92,7 +154,20 @@ export default function GenrePage({ params }: GenrePageProps) {
   ).join(' ');
 
   return (
-    <div className="min-h-screen bg-gray-900">
+    <>
+      <Head>
+        <title>{genreName} Movies - Watch Free Online | 123Movies</title>
+        <meta name="description" content={`Watch the best ${genreName.toLowerCase()} movies online for free. Discover top-rated ${genreName.toLowerCase()} films with HD quality streaming.`} />
+        <meta name="keywords" content={getGenreKeywords(slug).join(', ')} />
+        <meta property="og:title" content={`${genreName} Movies - Watch Free Online`} />
+        <meta property="og:description" content={`Discover the best ${genreName.toLowerCase()} movies online for free. HD quality streaming available.`} />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`${genreName} Movies - Watch Free Online`} />
+        <meta name="twitter:description" content={`Discover the best ${genreName.toLowerCase()} movies online for free.`} />
+      </Head>
+      
+      <div className="min-h-screen bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <h1 className="text-3xl font-bold text-white mb-8">{genreName} Movies</h1>
         
@@ -168,5 +243,6 @@ export default function GenrePage({ params }: GenrePageProps) {
         )}
       </div>
     </div>
+    </>
   );
 }

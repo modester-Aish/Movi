@@ -194,6 +194,15 @@ export default function SearchResultsPage() {
   return (
     <>
       <Head>
+        <title>Search Movies - Find Your Favorite Films | 123Movies</title>
+        <meta name="description" content="Search and find your favorite movies online. Browse through thousands of free HD movies by title, genre, or year. Quick and easy movie search with instant results." />
+        <meta name="keywords" content="search movies, find movies online, movie search engine, search films, browse movies, movie finder, search free movies, movie search tool" />
+        <meta property="og:title" content="Search Movies - Find Your Favorite Films" />
+        <meta property="og:description" content="Search and find your favorite movies online. Browse through thousands of free HD movies by title, genre, or year." />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Search Movies - Find Your Favorite Films" />
+        <meta name="twitter:description" content="Search and find your favorite movies online. Browse through thousands of free HD movies by title, genre, or year." />
         <link rel="canonical" href="https://ww1.n123movie.me/search" />
       </Head>
       <Suspense fallback={
