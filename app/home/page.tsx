@@ -177,8 +177,8 @@ function TVSeriesDisplay({ activeCategory, categoryConfig }: { activeCategory: s
       additionalFilters = '&minYear=2023'; // Very recent shows
     }
     
-    // Fetch only 28 series for category (7 * 4 pages max)
-    fetch(`/api/tv-series-db?limit=28&sortBy=${sortBy}&sortOrder=${sortOrder}${additionalFilters}`)
+    // Fetch only 14 series for category (fast loading)
+    fetch(`/api/tv-series-db?limit=14&sortBy=${sortBy}&sortOrder=${sortOrder}${additionalFilters}`)
       .then(res => res.json())
       .then(result => {
         if (result.success && result.data) {
@@ -353,11 +353,11 @@ export default function HomePage() {
   ];
 
   const tvCategoryConfig = [
-    { name: "New Releases", startIndex: 0, count: 100 },      // Latest series available (load more enabled)
-    { name: "Popular", startIndex: 100, count: 100 },         // Next batch
-    { name: "Featured", startIndex: 200, count: 100 },        // Featured content
-    { name: "Classic Shows", startIndex: 500, count: 100 },   // Older classics
-    { name: "Trending", startIndex: 1000, count: 100 }        // Different range
+    { name: "New Releases", startIndex: 0, count: 14 },      // Latest series available (fast loading)
+    { name: "Popular", startIndex: 100, count: 14 },         // Next batch
+    { name: "Featured", startIndex: 200, count: 14 },        // Featured content
+    { name: "Classic Shows", startIndex: 500, count: 14 },   // Older classics
+    { name: "Trending", startIndex: 1000, count: 14 }        // Different range
   ];
 
   const categoryConfig = currentMode === 'movies' ? movieCategoryConfig : tvCategoryConfig;
