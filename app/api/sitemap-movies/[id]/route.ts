@@ -40,9 +40,8 @@ export async function GET(
     const urlEntries = movieIdsChunk
       .filter(imdbId => imdbId && imdbId.trim() !== '')
       .map(imdbId => {
-        // Create URL structure that matches actual movie page URLs
-        // Use the old format that redirects to new format: /tt0068646
-        const url = `/${imdbId}`;
+        // Create a basic URL structure for the movie
+        const url = `/movie/${imdbId}`;
         return `  <url>
     <loc>${DOMAIN}${url}</loc>
     <lastmod>${lastmod}</lastmod>
