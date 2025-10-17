@@ -46,10 +46,11 @@ export function generateMovieSEO(movie: Movie, baseUrl?: string): SEOConfig {
     'HD movies free'
   ];
 
-  // Create SEO-optimized description
-  const description = movie.overview 
-    ? `${movie.overview} Watch ${movie.title} online for free. Download ${movie.title} in HD quality. ${movie.genres?.map(g => g.name).join(', ')} movie from ${movie.release_date?.split('-')[0] || 'N/A'}.`
-    : `Watch ${movie.title} online for free. Download ${movie.title} in HD quality. ${movie.genres?.map(g => g.name).join(', ')} movie from ${movie.release_date?.split('-')[0] || 'N/A'}. Free streaming available.`;
+  // Create SEO-optimized description (shorter and cleaner)
+  const shortOverview = movie.overview ? movie.overview.substring(0, 120) + '...' : '';
+  const description = shortOverview 
+    ? `Watch ${movie.title} (${movie.release_date?.split('-')[0] || 'N/A'}) online free. ${shortOverview} HD streaming available.`
+    : `Watch ${movie.title} (${movie.release_date?.split('-')[0] || 'N/A'}) online free. HD streaming available.`;
 
   return {
     title: `${movie.title} (${movie.release_date?.split('-')[0] || 'N/A'}) - Watch Online Free | 123Movies`,

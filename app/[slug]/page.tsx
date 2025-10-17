@@ -70,15 +70,16 @@ export async function generateMetadata({ params }: MoviePageProps): Promise<Meta
       const series = await getTMDBSeries(tmdbId);
       if (series) {
         const baseUrl = getBaseUrlForBuild();
+        const shortOverview = series.overview ? series.overview.substring(0, 120) + '...' : '';
         return {
           title: `${series.name} - Watch All Seasons Online`,
-          description: series.overview || `Watch ${series.name} - All seasons and episodes available.`,
+          description: shortOverview || `Watch ${series.name} online free. All seasons and episodes available.`,
           alternates: {
             canonical: `${baseUrl}/${slug}`,
           },
           openGraph: {
             title: `${series.name} - Watch All Seasons Online`,
-            description: series.overview || `Watch ${series.name} - All seasons and episodes available.`,
+            description: shortOverview || `Watch ${series.name} online free. All seasons and episodes available.`,
             url: `${baseUrl}/${slug}`,
             type: 'video.tv_show',
           },
@@ -278,7 +279,11 @@ export default async function MoviePage({ params }: MoviePageProps) {
                 )}
                 
                 {series.overview && (
-                  <p className="text-gray-300 leading-relaxed mb-4">{series.overview}</p>
+                  <p className="text-gray-300 leading-relaxed mb-4">
+                    {series.overview.length > 200 
+                      ? series.overview.substring(0, 200) + '...' 
+                      : series.overview}
+                  </p>
                 )}
                 
                 <div className="grid grid-cols-2 gap-4 text-sm">
@@ -469,7 +474,9 @@ export default async function MoviePage({ params }: MoviePageProps) {
 
                   {/* Synopsis */}
                   <p className="text-black italic mb-4 leading-relaxed">
-                    {movie.overview}
+                    {movie.overview && movie.overview.length > 200 
+                      ? movie.overview.substring(0, 200) + '...' 
+                      : movie.overview}
                   </p>
 
                   {/* Movie Details - Responsive grid layout */}
@@ -569,7 +576,9 @@ export default async function MoviePage({ params }: MoviePageProps) {
               <div className="space-y-3">
                 <h3 className="text-lg font-semibold text-gray-900">Synopsis</h3>
                 <p className="text-gray-800 leading-relaxed italic">
-                  {movie.overview}
+                  {movie.overview && movie.overview.length > 300 
+                    ? movie.overview.substring(0, 300) + '...' 
+                    : movie.overview}
                 </p>
               </div>
             </div>
