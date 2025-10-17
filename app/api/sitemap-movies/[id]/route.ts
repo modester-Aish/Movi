@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateMovieUrl } from '@/lib/slug';
+import { getMovieByImdbId } from '@/api/tmdb';
 
 const DOMAIN = 'https://ww1.n123movie.me';
 const MOVIES_PER_SITEMAP = 1000; // 1k per sitemap batch
@@ -36,24 +37,50 @@ export async function GET(
     // Generate sitemap XML directly from movie IDs (without TMDB API call for speed)
     const lastmod = new Date().toISOString();
     
-    // Generate sitemap XML directly from movie IDs
-    const urlEntries = movieIdsChunk
-      .filter(imdbId => imdbId && imdbId.trim() !== '')
-      .map(imdbId => {
-        // Create a basic URL structure for the movie
-        const url = `/movie/${imdbId}`;
-        return `  <url>
+    // Generate sitemap XML with actual movie URLs (title-slug format)
+    const urlEntries = await Promise.all(
+      movieIdsChunk
+        .filter(imdbId => imdbId && imdbId.trim() !== '')
+        .map(async (imdbId) => {
+          try {
+            // Get movie details to generate proper URL
+            const movie = await getMovieByImdbId(imdbId);
+            if (movie && movie.title) {
+              // Generate URL using the same logic as movie pages
+              const url = generateMovieUrl(movie.title, movie.imdb_id);
+              return `  <url>
     <loc>${DOMAIN}${url}</loc>
     <lastmod>${lastmod}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>`;
-      })
-      .join('\n');
+            } else {
+              // Fallback to IMDB ID format if movie not found
+              return `  <url>
+    <loc>${DOMAIN}/${imdbId}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>`;
+            }
+          } catch (error) {
+            console.error(`Error processing movie ${imdbId}:`, error);
+            // Fallback to IMDB ID format
+            return `  <url>
+    <loc>${DOMAIN}/${imdbId}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>`;
+          }
+        })
+    );
+    
+    const urlEntriesString = urlEntries.join('\n');
     
     const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urlEntries}
+${urlEntriesString}
 </urlset>`;
 
     return new Response(sitemap, {
