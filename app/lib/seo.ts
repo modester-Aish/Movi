@@ -19,7 +19,14 @@ export interface SEOConfig {
 export function generateMovieSEO(movie: Movie, baseUrl?: string): SEOConfig {
   // Use ww1.n123movie.me domain for canonical URL
   const currentBaseUrl = 'https://ww1.n123movie.me';
-  const movieUrl = `${currentBaseUrl}/${movie.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')}-${movie.imdb_id}`;
+  // Generate URL that matches the actual page URL format
+  const titleSlug = movie.title.toLowerCase()
+    .replace(/[^a-z0-9\s]/g, '') // Remove special characters
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .replace(/-+/g, '-') // Replace multiple hyphens with single
+    .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+  
+  const movieUrl = `${currentBaseUrl}/${titleSlug}-${movie.imdb_id}`;
   const posterUrl = movie.poster_path 
     ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
     : `${currentBaseUrl}/placeholder.svg`;
